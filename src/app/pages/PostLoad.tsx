@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Package, 
@@ -36,6 +36,8 @@ import { TraderTopBar } from '../components/trader/TraderTopBar';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link } from 'react-router';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 interface MatchedDriver {
   id: string;
   name: string;
@@ -49,6 +51,8 @@ interface MatchedDriver {
   distance: number;
   matchScore: number;
   returnTrip: boolean;
+  reasons?: string[];
+  etaMin?: number;
 }
 
 export default function PostLoad() {
@@ -57,6 +61,7 @@ export default function PostLoad() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [matchedDrivers, setMatchedDrivers] = useState<MatchedDriver[]>([]);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
   const [showReturnTripSuggestion, setShowReturnTripSuggestion] = useState(false);
@@ -95,6 +100,28 @@ export default function PostLoad() {
     budget: '',
     notes: '',
   });
+
+  const step1Valid = formData.loadType.trim().length > 0 && Number(formData.weight) > 0;
+  const step2Valid =
+    formData.pickupCity.trim().length > 0 &&
+    formData.pickupLocation.trim().length > 0 &&
+    formData.pickupDate.trim().length > 0 &&
+    formData.pickupTime.trim().length > 0 &&
+    formData.pickupContact.trim().length > 0 &&
+    formData.pickupPhone.trim().length > 0;
+  const step3Valid =
+    formData.deliveryCity.trim().length > 0 &&
+    formData.deliveryLocation.trim().length > 0 &&
+    formData.deliveryDate.trim().length > 0 &&
+    formData.deliveryContact.trim().length > 0 &&
+    formData.deliveryPhone.trim().length > 0;
+  const step4Valid = formData.truckType.trim().length > 0;
+  const canProceed =
+    currentStep === 1 ? step1Valid :
+    currentStep === 2 ? step2Valid :
+    currentStep === 3 ? step3Valid :
+    currentStep === 4 ? step4Valid :
+    true;
 
   const content = {
     sw: {
@@ -160,6 +187,9 @@ export default function PostLoad() {
       previous: 'Rudi',
       submit: 'Tuma Mzigo',
       submitting: 'Inatuma...',
+      submitError: 'Imeshindwa kutuma mzigo. Tafadhali jaribu tena.',
+      authRequired: 'Tafadhali ingia ili kutuma mzigo.',
+      requiredFields: 'Tafadhali jaza taarifa zote zinazotakiwa.',
       
       // Success
       success: 'Mzigo Umetumwa!',
@@ -255,6 +285,9 @@ export default function PostLoad() {
       previous: 'Previous',
       submit: 'Post Load',
       submitting: 'Posting...',
+      submitError: 'Failed to post load. Please try again.',
+      authRequired: 'Please sign in to post a load.',
+      requiredFields: 'Please complete the required fields.',
       
       // Success
       success: 'Load Posted Successfully!',
@@ -291,54 +324,14 @@ export default function PostLoad() {
 
   const text = content[language];
 
-  // Mock matched drivers
-  useEffect(() => {
-    if (currentStep === 5) {
-      // Simulate driver matching
-      const mockDrivers: MatchedDriver[] = [
-        {
-          id: '1',
-          name: 'John Kamau',
-          photo: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?w=400',
-          rating: 4.9,
-          trips: 324,
-          truckType: 'Flatbed',
-          capacity: '20 tons',
-          price: '$450',
-          availability: 'Today',
-          distance: 45,
-          matchScore: 95,
-          returnTrip: true,
-        },
-        {
-          id: '2',
-          name: 'Peter Wanjiru',
-          photo: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?w=400',
-          rating: 4.8,
-          trips: 256,
-          truckType: 'Container',
-          capacity: '25 tons',
-          price: '$520',
-          availability: 'Tomorrow',
-          distance: 78,
-          matchScore: 88,
-          returnTrip: false,
-        },
-      ];
-      setMatchedDrivers(mockDrivers);
-      
-      // Calculate estimated price
-      const price = 400 + Math.random() * 200;
-      setEstimatedPrice(Math.round(price));
-      
-      // Check for return trip optimization
-      if (mockDrivers.some(d => d.returnTrip)) {
-        setTimeout(() => setShowReturnTripSuggestion(true), 1000);
-      }
-    }
-  }, [currentStep]);
+  // Matches are fetched from the backend on submit.
 
   const handleNext = () => {
+    setError(null);
+    if (!canProceed) {
+      setError(text.requiredFields);
+      return;
+    }
     if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
@@ -350,12 +343,108 @@ export default function PostLoad() {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+    setError(null);
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error(text.authRequired);
+      }
+      if (!step1Valid || !step2Valid || !step3Valid || !step4Valid) {
+        throw new Error(text.requiredFields);
+      }
+
+      const payload = {
+        pickupLocation: formData.pickupLocation || formData.pickupCity,
+        deliveryLocation: formData.deliveryLocation || formData.deliveryCity,
+        cargoType: formData.loadType || 'general',
+        weight: Number(formData.weight || 0),
+        loadType: formData.loadType,
+        length: formData.length ? Number(formData.length) : undefined,
+        width: formData.width ? Number(formData.width) : undefined,
+        height: formData.height ? Number(formData.height) : undefined,
+        quantity: formData.quantity ? Number(formData.quantity) : undefined,
+        description: formData.description || undefined,
+        pickupCity: formData.pickupCity || undefined,
+        pickupDate: formData.pickupDate || undefined,
+        pickupTime: formData.pickupTime || undefined,
+        contactName: formData.pickupContact || undefined,
+        contactPhone: formData.pickupPhone || undefined,
+        deliveryCity: formData.deliveryCity || undefined,
+        deliveryDate: formData.deliveryDate || undefined,
+        deliveryTime: formData.deliveryTime || undefined,
+        deliveryContact: formData.deliveryContact || undefined,
+        deliveryPhone: formData.deliveryPhone || undefined,
+        truckType: formData.truckType || undefined,
+        specialRequirements: formData.specialRequirements,
+        budget: formData.budget ? Number(formData.budget) : undefined,
+        notes: formData.notes || undefined
+      };
+
+      if (!payload.pickupLocation || !payload.deliveryLocation || !payload.cargoType || !payload.weight) {
+        throw new Error(text.requiredFields);
+      }
+
+      const response = await fetch(`${BACKEND_URL}/api/v1/loads`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || text.submitError);
+      }
+
+      if (payload.budget) {
+        setEstimatedPrice(Number(payload.budget));
+      } else {
+        const price = 400 + Math.random() * 200;
+        setEstimatedPrice(Math.round(price));
+      }
+
+      if (data?.data?._id) {
+        const matchRes = await fetch(`${BACKEND_URL}/api/v1/loads/${data.data._id}/matches?limit=5`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const matchData = await matchRes.json();
+          if (matchRes.ok && Array.isArray(matchData?.data)) {
+            const fallbackPhoto = 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?w=400';
+            const mapped = matchData.data.map((match: any, index: number) => {
+              const driver = match.driver || {};
+              return {
+                id: driver._id || String(index),
+                name: driver.name || 'Driver',
+                photo: driver.photo || fallbackPhoto,
+                rating: typeof driver.rating === 'number' ? driver.rating : 4.5,
+                trips: driver.trips || 0,
+                truckType: Array.isArray(driver.truckTypes) ? driver.truckTypes[0] : driver.truckType || 'Truck',
+                capacity: driver.maxWeight ? `${driver.maxWeight} tons` : 'N/A',
+                price: driver.pricePerKm ? `KES ${driver.pricePerKm}/km` : 'Negotiable',
+                availability: driver.availability?.status || 'available',
+                distance: match.distanceKm || 0,
+                matchScore: Math.round(match.score || 0),
+                returnTrip: false,
+                reasons: Array.isArray(match.reasons) ? match.reasons : [],
+                etaMin: typeof match.durationMin === 'number' ? Math.round(match.durationMin) : undefined
+              };
+            });
+          setMatchedDrivers(mapped);
+          if (mapped.some((d: MatchedDriver) => d.returnTrip)) {
+            setTimeout(() => setShowReturnTripSuggestion(true), 1000);
+          }
+        }
+      }
+
       setShowSuccess(true);
-    }, 2000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.submitError);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const toggleSpecialRequirement = (requirement: string) => {
@@ -1033,6 +1122,14 @@ export default function PostLoad() {
                                     <span>•</span>
                                     <span>{driver.truckType}</span>
                                   </div>
+                                  {driver.reasons && driver.reasons.length > 0 && (
+                                    <div className="mt-2 text-xs text-[#4B2E2B]/60">
+                                      {driver.reasons.slice(0, 3).map((reason) => (
+                                        <div key={reason}>{reason}</div>
+                                      ))}
+                                      {driver.etaMin ? <div>ETA: {driver.etaMin} min</div> : null}
+                                    </div>
+                                  )}
                                 </div>
                                 <div className="text-right">
                                   <p className="text-xl text-[#4B2E2B] mb-1">{driver.price}</p>
@@ -1078,6 +1175,9 @@ export default function PostLoad() {
                   )}
 
                   {/* Navigation Buttons */}
+                  {error && (
+                    <div className="mb-4 text-sm text-red-600">{error}</div>
+                  )}
                   <div className="flex gap-4 mt-8 pt-6 border-t border-[#4B2E2B]/10">
                     {currentStep > 1 && (
                       <motion.button
@@ -1096,7 +1196,8 @@ export default function PostLoad() {
                         whileHover={{ scale: 1.02, x: 2 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleNext}
-                        className="flex-1 py-3 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg"
+                        disabled={!canProceed}
+                        className="flex-1 py-3 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-70 disabled:cursor-not-allowed"
                       >
                         {text.next}
                         <ArrowRight className="w-5 h-5" />

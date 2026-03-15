@@ -17,12 +17,15 @@ import {
 import { Link, useNavigate } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+
 export default function TraderLogin() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [floatingElements, setFloatingElements] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([]);
   const navigate = useNavigate();
@@ -38,6 +41,7 @@ export default function TraderLogin() {
       noAccount: 'Huna akaunti?',
       register: 'Jisajili',
       loggingIn: 'Inaingia...',
+      loginFailed: 'Imeshindikana kuingia. Angalia taarifa zako.',
       stats: [
         { value: '5,000+', label: 'Wapelekaji Wameridhika' },
         { value: '10,000+', label: 'Mizigo Imesafirishwa' },
@@ -59,6 +63,7 @@ export default function TraderLogin() {
       noAccount: "Don't have an account?",
       register: 'Register',
       loggingIn: 'Signing in...',
+      loginFailed: 'Login failed. Please check your credentials.',
       stats: [
         { value: '5,000+', label: 'Happy Shippers' },
         { value: '10,000+', label: 'Loads Delivered' },
@@ -102,10 +107,31 @@ export default function TraderLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login
-    setTimeout(() => {
+    setError(null);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || text.loginFailed);
+      }
+
+      if (data?.data?.token) {
+        localStorage.setItem('auth_token', data.data.token);
+      }
+      if (data?.data?.user) {
+        localStorage.setItem('auth_user', JSON.stringify(data.data.user));
+      }
+
       navigate('/trader-dashboard');
-    }, 1500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.loginFailed);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -414,6 +440,10 @@ export default function TraderLogin() {
                   )}
                 </motion.button>
               </div>
+
+              {error && (
+                <div className="mt-4 text-center text-sm text-red-600">{error}</div>
+              )}
 
               {/* Sparkle decorations */}
               <motion.div

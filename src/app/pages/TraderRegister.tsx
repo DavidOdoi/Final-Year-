@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Building2, 
@@ -7,6 +7,7 @@ import {
   Phone, 
   MapPin, 
   Briefcase, 
+  Lock,
   ArrowRight, 
   ArrowLeft, 
   CheckCircle,
@@ -14,16 +15,25 @@ import {
   Globe,
   Shield,
   Package,
-  TrendingUp
+  TrendingUp,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export default function TraderRegister() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -55,6 +65,10 @@ export default function TraderRegister() {
       success: 'Hongera!',
       successMessage: 'Akaunti yako imetengenezwa kwa mafanikio',
       goToDashboard: 'Nenda kwenye Dashibodi',
+      requiredError: 'Tafadhali jaza sehemu zote zinazotakiwa.',
+      passwordMismatch: 'Nywila hazifanani.',
+      passwordShort: 'Nywila iwe angalau herufi 6.',
+      registerFailed: 'Imeshindwa kuunda akaunti. Jaribu tena.',
       features: [
         { title: 'Madereva wa Kuaminika', desc: 'Madereva 500+ waliokaguliwa' },
         { title: 'Ufuatiliaji wa Moja kwa Moja', desc: 'Fuatilia mizigo yako wakati wote' },
@@ -80,6 +94,10 @@ export default function TraderRegister() {
       success: 'Congratulations!',
       successMessage: 'Your account has been created successfully',
       goToDashboard: 'Go to Dashboard',
+      requiredError: 'Please fill in all required fields.',
+      passwordMismatch: 'Passwords do not match.',
+      passwordShort: 'Password must be at least 6 characters.',
+      registerFailed: 'Failed to create account. Please try again.',
       features: [
         { title: 'Verified Drivers', desc: '500+ vetted professionals' },
         { title: 'Live Tracking', desc: 'Track your shipments 24/7' },
@@ -97,18 +115,46 @@ export default function TraderRegister() {
   ];
 
   // Auto-rotate images
-  useState(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
     }, 5000);
     return () => clearInterval(interval);
-  });
+  }, [images.length]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
+  const step1Valid = formData.companyName.trim().length > 0 && formData.location.trim().length > 0;
+  const step2Valid =
+    formData.contactPerson.trim().length > 0 &&
+    formData.email.trim().length > 0 &&
+    formData.phone.trim().length > 0 &&
+    password.length >= 6 &&
+    password === confirmPassword;
+  const step3Valid = formData.businessType.trim().length > 0 && formData.tradingVolume.trim().length > 0;
+  const canProceed = currentStep === 1 ? step1Valid : currentStep === 2 ? step2Valid : step3Valid;
+
   const handleNext = () => {
+    setError(null);
+    if (currentStep === 1 && !step1Valid) {
+      setError(text.requiredError);
+      return;
+    }
+    if (currentStep === 2 && !step2Valid) {
+      if (!formData.contactPerson.trim() || !formData.email.trim() || !formData.phone.trim() || !password || !confirmPassword) {
+        setError(text.requiredError);
+      } else if (password.length < 6) {
+        setError(text.passwordShort);
+      } else if (password !== confirmPassword) {
+        setError(text.passwordMismatch);
+      } else {
+        setError(text.requiredError);
+      }
+      return;
+    }
+
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -120,8 +166,56 @@ export default function TraderRegister() {
     }
   };
 
-  const handleSubmit = () => {
-    setIsSubmitted(true);
+  const handleSubmit = async () => {
+    setError(null);
+    if (!step3Valid) {
+      setError(text.requiredError);
+      return;
+    }
+    if (!password || password.length < 6) {
+      setError(text.passwordShort);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError(text.passwordMismatch);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.contactPerson,
+          companyName: formData.companyName,
+          location: formData.location,
+          businessType: formData.businessType,
+          tradingVolume: formData.tradingVolume,
+          email: formData.email,
+          phone: formData.phone,
+          password,
+          role: 'trader'
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || text.registerFailed);
+      }
+
+      if (data?.data?.token) {
+        localStorage.setItem('auth_token', data.data.token);
+      }
+      if (data?.data?.user) {
+        localStorage.setItem('auth_user', JSON.stringify(data.data.user));
+      }
+
+      setIsSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : text.registerFailed);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -219,6 +313,45 @@ export default function TraderRegister() {
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
                   placeholder="+254 700 000 000"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-[#4B2E2B] mb-2">
+                {language === 'sw' ? 'Nywila' : 'Password'} *
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-12 pr-12 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  placeholder={language === 'sw' ? 'Weka nywila' : 'Enter password'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4B2E2B]/40 hover:text-[#D4A373] transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-[#4B2E2B] mb-2">
+                {language === 'sw' ? 'Thibitisha Nywila' : 'Confirm Password'} *
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  placeholder={language === 'sw' ? 'Rudia nywila' : 'Confirm password'}
                 />
               </div>
             </div>
@@ -492,6 +625,10 @@ export default function TraderRegister() {
               </AnimatePresence>
             </div>
 
+            {error && (
+              <div className="mb-4 text-sm text-red-600 text-center">{error}</div>
+            )}
+
             {/* Navigation Buttons */}
             <div className="flex gap-4">
               {currentStep > 1 && (
@@ -511,9 +648,10 @@ export default function TraderRegister() {
                 whileHover={{ scale: 1.02, x: 4 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={currentStep === 3 ? handleSubmit : handleNext}
-                className="flex-1 py-4 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
+                disabled={isSubmitting || !canProceed}
+                className="flex-1 py-4 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                {currentStep === 3 ? text.submit : text.next}
+                {isSubmitting ? (language === 'sw' ? 'Inatuma...' : 'Submitting...') : (currentStep === 3 ? text.submit : text.next)}
                 <ArrowRight className="w-5 h-5" />
               </motion.button>
             </div>
