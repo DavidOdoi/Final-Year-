@@ -6,11 +6,13 @@
 
   ## Running the code
   Clone the repo
+  
   Open it in a code editor(  Vsscode preferable
   
 
   Run `npm i` to install the dependencies.
 
   Run `npm run dev` to start the development server.
+  
   Click or copy the link and paste it in your prefered browser.
   
