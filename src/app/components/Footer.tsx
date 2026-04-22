@@ -5,12 +5,12 @@ interface FooterProps {
 export function Footer({ language }: FooterProps) {
   const content = {
     sw: {
-      tagline: 'Safirisha Mizigo Kwa Urahisi - Huduma ya usafirishaji wa Afrika Mashariki',
-      copyright: '© 2026 Safirisha. Haki zote zimehifadhiwa.',
+      tagline: 'Usafirishaji Mizigo Kwa Urahisi - Huduma ya usafirishaji wa Afrika Mashariki',
+      copyright: '© 2026 Usafirishaji. Haki zote zimehifadhiwa.',
     },
     en: {
       tagline: 'Transport Goods Easily - East Africa Freight Service',
-      copyright: '© 2026 Safirisha. All rights reserved.',
+      copyright: '© 2026 ELOGISTICA. All rights reserved.',
     },
   };
 
@@ -27,3 +27,6 @@ export function Footer({ language }: FooterProps) {
     </footer>
   );
 }
+
+
+

@@ -19,11 +19,11 @@ function Counter({ end, duration = 2, suffix = '' }: { end: number; duration?: n
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / (duration * 1000), 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       setCount(Math.floor(easeOutQuart * end));
-      
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
@@ -48,33 +48,33 @@ export function Statistics({ language }: StatisticsProps) {
       subtitle: 'Kubadilisha usafirishaji wa mizigo katika Afrika Mashariki',
       badge: 'Takwimu za Moja kwa Moja',
       stats: [
-        { 
-          value: 10000, 
-          suffix: '+', 
+        {
+          value: 10000,
+          suffix: '+',
           label: 'Madereva Waliojisajili',
           subtext: 'Madereva wa kuaminika',
           icon: Users,
           color: 'from-blue-500 to-cyan-500',
         },
-        { 
-          value: 50000, 
-          suffix: '+', 
+        {
+          value: 50000,
+          suffix: '+',
           label: 'Mizigo Iliyosafirisha',
           subtext: 'Safari zilizokamilika',
           icon: Package,
           color: 'from-purple-500 to-pink-500',
         },
-        { 
-          value: 8, 
-          suffix: '', 
+        {
+          value: 8,
+          suffix: '',
           label: 'Nchi za Afrika Mashariki',
           subtext: 'Mtandao wa kikanda',
           icon: Globe,
           color: 'from-orange-500 to-red-500',
         },
-        { 
-          value: 98, 
-          suffix: '%', 
+        {
+          value: 98,
+          suffix: '%',
           label: 'Kuridhika kwa Wateja',
           subtext: 'Ukaguzi wa wastani',
           icon: Award,
@@ -104,33 +104,33 @@ export function Statistics({ language }: StatisticsProps) {
       subtitle: 'Transforming freight logistics across East Africa',
       badge: 'Live Statistics',
       stats: [
-        { 
-          value: 10000, 
-          suffix: '+', 
+        {
+          value: 10000,
+          suffix: '+',
           label: 'Registered Drivers',
           subtext: 'Verified professionals',
           icon: Users,
           color: 'from-blue-500 to-cyan-500',
         },
-        { 
-          value: 50000, 
-          suffix: '+', 
+        {
+          value: 50000,
+          suffix: '+',
           label: 'Loads Delivered',
           subtext: 'Successful trips',
           icon: Package,
           color: 'from-purple-500 to-pink-500',
         },
-        { 
-          value: 8, 
-          suffix: '', 
+        {
+          value: 8,
+          suffix: '',
           label: 'East African Countries',
           subtext: 'Regional network',
           icon: Globe,
           color: 'from-orange-500 to-red-500',
         },
-        { 
-          value: 98, 
-          suffix: '%', 
+        {
+          value: 98,
+          suffix: '%',
           label: 'Customer Satisfaction',
           subtext: 'Average rating',
           icon: Award,
@@ -165,7 +165,7 @@ export function Statistics({ language }: StatisticsProps) {
       <div className="absolute inset-0">
         {/* Grid Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div 
+          <div
             className="absolute inset-0"
             style={{
               backgroundImage: `
@@ -216,7 +216,7 @@ export function Statistics({ language }: StatisticsProps) {
             <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
             <span className="text-white/90 text-sm uppercase tracking-wide">{text.badge}</span>
           </motion.div>
-          
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -246,12 +246,12 @@ export function Statistics({ language }: StatisticsProps) {
                 initial={{ opacity: 0, y: 50, scale: 0.8 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ 
+                transition={{
                   delay: index * 0.1,
                   type: "spring",
                   stiffness: 100,
                 }}
-                whileHover={{ 
+                whileHover={{
                   scale: 1.05,
                   y: -10,
                 }}
@@ -350,3 +350,6 @@ export function Statistics({ language }: StatisticsProps) {
     </div>
   );
 }
+
+
+

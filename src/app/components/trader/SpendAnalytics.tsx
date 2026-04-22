@@ -73,7 +73,7 @@ export function SpendAnalytics({ language }: SpendAnalyticsProps) {
             <span className="text-xs text-white/60">{text.total}</span>
           </div>
           <div className="text-2xl text-white">
-            KES {(totalSpend / 1000000).toFixed(1)}M
+            UGX {(totalSpend / 1000000).toFixed(1)}M
           </div>
         </motion.div>
 
@@ -88,7 +88,7 @@ export function SpendAnalytics({ language }: SpendAnalyticsProps) {
             <span className="text-xs text-white/80">{text.average}</span>
           </div>
           <div className="text-2xl text-white">
-            KES {Math.round(averageSpend / 1000)}K
+            UGX {Math.round(averageSpend / 1000)}K
           </div>
         </motion.div>
       </div>
@@ -125,7 +125,7 @@ export function SpendAnalytics({ language }: SpendAnalyticsProps) {
               }}
               formatter={(value: number, name: string) => {
                 if (name === 'spend') {
-                  return [`KES ${(value / 1000).toFixed(0)}K`, 'Spend'];
+                  return [`UGX ${(value / 1000).toFixed(0)}K`, 'Spend'];
                 }
                 return [value, 'Shipments'];
               }}
@@ -167,3 +167,6 @@ export function SpendAnalytics({ language }: SpendAnalyticsProps) {
     </motion.div>
   );
 }
+
+
+

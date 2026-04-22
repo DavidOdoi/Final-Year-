@@ -423,7 +423,7 @@ export default function PostLoad() {
                 trips: driver.trips || 0,
                 truckType: Array.isArray(driver.truckTypes) ? driver.truckTypes[0] : driver.truckType || 'Truck',
                 capacity: driver.maxWeight ? `${driver.maxWeight} tons` : 'N/A',
-                price: driver.pricePerKm ? `KES ${driver.pricePerKm}/km` : 'Negotiable',
+                price: driver.pricePerKm ? `UGX ${driver.pricePerKm}/km` : 'Negotiable',
                 availability: driver.availability?.status || 'available',
                 distance: match.distanceKm || 0,
                 matchScore: Math.round(match.score || 0),
@@ -1353,3 +1353,6 @@ export default function PostLoad() {
     </div>
   );
 }
+
+
+

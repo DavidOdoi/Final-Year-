@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { Bell, Wallet, Globe, Menu, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import profilePic from '../../../assets/images/yes.png';
 
 interface TraderTopBarProps {
   language: 'sw' | 'en';
@@ -46,7 +47,7 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               <Menu className="w-6 h-6 text-[#4B2E2B]" />
             </motion.button>
             <div className="flex items-center gap-3">
-              <motion.div 
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="hidden md:flex w-12 h-12 bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] rounded-xl items-center justify-center"
               >
@@ -69,7 +70,7 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               <Wallet className="w-4 h-4" />
               <div className="flex flex-col">
                 <span className="text-[10px] opacity-80 hidden md:block">{text.wallet}</span>
-                <span className="text-xs md:text-sm font-medium">KES 248,500</span>
+                <span className="text-xs md:text-sm font-medium">UGX 248,500</span>
               </div>
             </motion.div>
 
@@ -90,10 +91,10 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               className="relative p-2 hover:bg-[#F7EFE9] rounded-full transition-colors"
             >
               <Bell className="w-5 h-5 text-[#4B2E2B]" />
-              <motion.div 
+              <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" 
+                className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full border-2 border-white"
               />
             </motion.button>
 
@@ -104,7 +105,7 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4A373] shadow-md"
             >
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=100&h=100&fit=crop"
+                src={profilePic}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -115,3 +116,5 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
     </header>
   );
 }
+
+

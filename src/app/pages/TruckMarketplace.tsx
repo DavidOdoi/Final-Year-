@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Truck, 
-  MapPin, 
-  Filter, 
-  Search, 
-  Star, 
+import {
+  Truck,
+  MapPin,
+  Filter,
+  Search,
+  Star,
   Calendar,
   Package,
   TrendingUp,
@@ -27,6 +27,11 @@ import {
 import { TraderSidebar } from '../components/trader/TraderSidebar';
 import { TraderTopBar } from '../components/trader/TraderTopBar';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+import driverImage from '../../assets/images/driver.png';
+import odoiImage from '../../assets/images/odoi.png';
+import onesmusImage from '../../assets/images/onesmus.png';
+import simbaImage from '../../assets/images/simba.png';
+import dorothyImage from '../../assets/images/dorothy.png';
 
 interface AvailableTruck {
   id: string;
@@ -136,8 +141,8 @@ export default function TruckMarketplace() {
   const [availableTrucks, setAvailableTrucks] = useState<AvailableTruck[]>([
     {
       id: '1',
-      driver: 'John Kamau',
-      driverPhoto: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cnVjayUyMGRyaXZlciUyMGNhYmluJTIwYWZyaWNhfGVufDF8fHx8MTc3MjcxMTc5M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+      driver: 'Mutebezi Enock',
+      driverPhoto: driverImage,
       truckType: 'Flatbed',
       capacity: '20 tons',
       currentLocation: 'Dar es Salaam, Tanzania',
@@ -154,8 +159,8 @@ export default function TruckMarketplace() {
     },
     {
       id: '2',
-      driver: 'James Omondi',
-      driverPhoto: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cnVjayUyMGRyaXZlciUyMGNhYmluJTIwYWZyaWNhfGVufDF8fHx8MTc3MjcxMTc5M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+      driver: 'Odoi David',
+      driverPhoto: odoiImage,
       truckType: 'Container',
       capacity: '30 tons',
       currentLocation: 'Mombasa, Kenya',
@@ -172,8 +177,8 @@ export default function TruckMarketplace() {
     },
     {
       id: '3',
-      driver: 'Peter Wanjiru',
-      driverPhoto: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cnVjayUyMGRyaXZlciUyMGNhYmluJTIwYWZyaWNhfGVufDF8fHx8MTc3MjcxMTc5M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+      driver: 'Mwebesa Onesmus',
+      driverPhoto: onesmusImage,
       truckType: 'Refrigerated',
       capacity: '15 tons',
       currentLocation: 'Nairobi, Kenya',
@@ -190,8 +195,8 @@ export default function TruckMarketplace() {
     },
     {
       id: '4',
-      driver: 'David Mutua',
-      driverPhoto: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cnVjayUyMGRyaXZlciUyMGNhYmluJTIwYWZyaWNhfGVufDF8fHx8MTc3MjcxMTc5M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+      driver: 'Simba Enock',
+      driverPhoto: simbaImage,
       truckType: 'Tanker',
       capacity: '25 tons',
       currentLocation: 'Dodoma, Tanzania',
@@ -208,8 +213,8 @@ export default function TruckMarketplace() {
     },
     {
       id: '5',
-      driver: 'Samuel Kibet',
-      driverPhoto: 'https://images.unsplash.com/photo-1576870996037-78d60be7509f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cnVjayUyMGRyaXZlciUyMGNhYmluJTIwYWZyaWNhfGVufDF8fHx8MTc3MjcxMTc5M3ww&ixlib=rb-4.1.0&q=80&w=1080',
+      driver: 'Niwabine Dorothy',
+      driverPhoto: dorothyImage,
       truckType: 'Flatbed',
       capacity: '18 tons',
       currentLocation: 'Arusha, Tanzania',
@@ -236,14 +241,14 @@ export default function TruckMarketplace() {
 
   // Filter trucks based on search and filters
   const filteredTrucks = availableTrucks.filter((truck) => {
-    const matchesSearch = 
+    const matchesSearch =
       truck.driver.toLowerCase().includes(searchQuery.toLowerCase()) ||
       truck.currentLocation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       truck.destination.toLowerCase().includes(searchQuery.toLowerCase()) ||
       truck.truckType.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesTruckType = 
-      filters.truckType === 'all' || 
+    const matchesTruckType =
+      filters.truckType === 'all' ||
       truck.truckType.toLowerCase() === filters.truckType.toLowerCase();
 
     return matchesSearch && matchesTruckType;
@@ -255,18 +260,18 @@ export default function TruckMarketplace() {
 
   return (
     <div className="relative min-h-screen bg-[#F7EFE9]">
-      <TraderSidebar 
-        language={language} 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
+      <TraderSidebar
+        language={language}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
       <div className="lg:ml-64 relative">
-        <TraderTopBar 
+        <TraderTopBar
           language={language}
           setLanguage={setLanguage}
           onMenuClick={() => setIsSidebarOpen(true)}
         />
-        
+
         <main className="relative p-4 md:p-8">
           {/* Header */}
           <motion.div
@@ -353,9 +358,8 @@ export default function TruckMarketplace() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setViewMode('list')}
-                  className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                    viewMode === 'list' ? 'bg-white text-[#4B2E2B] shadow-md' : 'text-[#4B2E2B]/60'
-                  }`}
+                  className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'list' ? 'bg-white text-[#4B2E2B] shadow-md' : 'text-[#4B2E2B]/60'
+                    }`}
                 >
                   <List className="w-5 h-5" />
                 </motion.button>
@@ -363,9 +367,8 @@ export default function TruckMarketplace() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => setViewMode('map')}
-                  className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
-                    viewMode === 'map' ? 'bg-white text-[#4B2E2B] shadow-md' : 'text-[#4B2E2B]/60'
-                  }`}
+                  className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${viewMode === 'map' ? 'bg-white text-[#4B2E2B] shadow-md' : 'text-[#4B2E2B]/60'
+                    }`}
                 >
                   <MapIcon className="w-5 h-5" />
                 </motion.button>
@@ -543,7 +546,7 @@ export default function TruckMarketplace() {
                   alt="Map"
                   className="w-full h-full object-cover opacity-20"
                 />
-                
+
                 {/* Truck Markers */}
                 {filteredTrucks.map((truck, index) => (
                   <motion.div
@@ -739,3 +742,5 @@ export default function TruckMarketplace() {
     </div>
   );
 }
+
+

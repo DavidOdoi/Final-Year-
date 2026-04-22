@@ -8,7 +8,7 @@ interface FeaturesSectionProps {
 export function FeaturesSection({ language }: FeaturesSectionProps) {
   const content = {
     sw: {
-      title: 'Kwa Nini Safirisha?',
+      title: 'Kwa Nini Usafirishaji?',
       subtitle: 'Huduma zinazokamilika za usafirishaji wa mizigo',
       features: [
         {
@@ -44,7 +44,7 @@ export function FeaturesSection({ language }: FeaturesSectionProps) {
       ],
     },
     en: {
-      title: 'Why Choose Safirisha?',
+      title: 'Why Choose ELOGISTICA?',
       subtitle: 'Complete freight logistics solutions',
       features: [
         {
@@ -122,3 +122,6 @@ export function FeaturesSection({ language }: FeaturesSectionProps) {
     </div>
   );
 }
+
+
+

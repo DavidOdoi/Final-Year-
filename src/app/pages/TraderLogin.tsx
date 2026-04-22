@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Mail, 
-  Lock, 
-  ArrowRight, 
-  Eye, 
+import login from '../../assets/images/login.png';
+import {
+  Mail,
+  Lock,
+  ArrowRight,
+  Eye,
   EyeOff,
   Globe,
   Sparkles,
@@ -80,7 +81,7 @@ export default function TraderLogin() {
   const text = content[language];
 
   const images = [
-    'https://images.unsplash.com/photo-1764169689207-e23fb66e1fcf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwYnVzaW5lc3MlMjBwcm9mZXNzaW9uYWwlMjBjb25maWRlbnR8ZW58MXx8fHwxNzcyNDQxMTg0fDA&ixlib=rb-4.1.0&q=80&w=1080',
+    login,
     'https://images.unsplash.com/photo-1766171359875-73155eff7f66?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjBkYXNoYm9hcmQlMjBjb21wdXRlciUyMHNjcmVlbnxlbnwxfHx8fDE3NzI0NDExODV8MA&ixlib=rb-4.1.0&q=80&w=1080',
     'https://images.unsplash.com/photo-1669333490889-194e8f46a766?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrZW55YSUyMG5haXJvYmklMjBjaXR5JTIwc2t5bGluZSUyMGJ1c2luZXNzfGVufDF8fHx8MTc3MjQ0MTE4NXww&ixlib=rb-4.1.0&q=80&w=1080',
   ];
@@ -191,7 +192,7 @@ export default function TraderLogin() {
             >
               <ImageWithFallback
                 src={images[currentImageIndex]}
-                alt="Safirisha Platform"
+                alt="ELOGISTICA Platform"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-br from-[#4B2E2B]/90 via-[#4B2E2B]/70 to-[#4B2E2B]/50" />
@@ -206,7 +207,7 @@ export default function TraderLogin() {
               animate={{ opacity: 1, y: 0 }}
               className="text-4xl"
             >
-              Safirisha
+              ELOGISTICA
             </motion.div>
 
             {/* Center Content */}
@@ -225,9 +226,9 @@ export default function TraderLogin() {
                 transition={{ delay: 0.3 }}
                 className="text-xl text-white/80 mb-12"
               >
-                {language === 'sw' 
-                  ? 'Jifunze jinsi maelfu ya wafanyabiashara wanavyotumia Safirisha kusafirisha mizigo yao.'
-                  : 'Join thousands of businesses using Safirisha to ship their goods across East Africa.'}
+                {language === 'sw'
+                  ? 'Jifunze jinsi maelfu ya wafanyabiashara wanavyotumia Usafirishaji kusafirisha mizigo yao.'
+                  : 'Join thousands of businesses using ELOGISTICA to ship their goods across East Africa.'}
               </motion.p>
 
               {/* Features List */}
@@ -271,13 +272,12 @@ export default function TraderLogin() {
                 <motion.div
                   key={index}
                   initial={{ scale: 0.8 }}
-                  animate={{ 
+                  animate={{
                     scale: currentImageIndex === index ? 1.2 : 1,
                     width: currentImageIndex === index ? '32px' : '8px',
                   }}
-                  className={`h-2 rounded-full transition-all ${
-                    currentImageIndex === index ? 'bg-[#D4A373]' : 'bg-white/40'
-                  }`}
+                  className={`h-2 rounded-full transition-all ${currentImageIndex === index ? 'bg-[#D4A373]' : 'bg-white/40'
+                    }`}
                 />
               ))}
             </div>
@@ -299,7 +299,7 @@ export default function TraderLogin() {
                     whileHover={{ scale: 1.05 }}
                     className="text-3xl text-[#4B2E2B] lg:hidden"
                   >
-                    Safirisha
+                    ELOGISTICA
                   </motion.div>
                 </Link>
                 <motion.button
@@ -428,7 +428,7 @@ export default function TraderLogin() {
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
-                  
+
                   {/* Shimmer effect */}
                   {!isLoading && (
                     <motion.div
@@ -539,3 +539,6 @@ export default function TraderLogin() {
     </div>
   );
 }
+
+
+

@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
 import { Bell, Wallet, Globe, Menu } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-
+import profilePic from '../../../assets/images/yes.png';
 interface TopBarProps {
   isOnline: boolean;
   setIsOnline: (value: boolean) => void;
@@ -62,10 +62,9 @@ export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuCli
               whileHover={{ scale: 1.02 }}
               className="flex items-center gap-2 bg-[#F7EFE9] px-4 py-2 rounded-full"
             >
-              <div 
-                className={`w-2 h-2 rounded-full ${
-                  isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
-                }`}
+              <div
+                className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                  }`}
               />
               <button
                 onClick={() => setIsOnline(!isOnline)}
@@ -81,7 +80,7 @@ export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuCli
               className="hidden md:flex items-center gap-2 bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] text-white px-4 py-2 rounded-full shadow-lg"
             >
               <Wallet className="w-4 h-4" />
-              <span className="text-sm">KES 45,320</span>
+              <span className="text-sm">UGX 45,320</span>
             </motion.div>
 
             {/* Language Toggle */}
@@ -111,7 +110,7 @@ export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuCli
               className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4A373] shadow-md"
             >
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1614890085618-0e1054da74f8?w=100&h=100&fit=crop"
+                src={profilePic}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />
@@ -122,3 +121,5 @@ export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuCli
     </header>
   );
 }
+
+

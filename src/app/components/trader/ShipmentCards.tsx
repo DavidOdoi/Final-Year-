@@ -17,7 +17,7 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
           from: 'Nairobi, KE',
           to: 'Kampala, UG',
           cargo: 'Vifaa vya Umeme (12 Tani)',
-          budget: 'KES 85,000',
+          budget: 'UGX 85,000',
           status: 'in-transit',
           statusLabel: 'Njiani',
           eta: '4 masaa',
@@ -29,7 +29,7 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
           from: 'Mombasa, KE',
           to: 'Dar es Salaam, TZ',
           cargo: 'Bidhaa za Bahari (8 Tani)',
-          budget: 'KES 62,000',
+          budget: 'UGX 62,000',
           status: 'pending',
           statusLabel: 'Inasubiri Dereva',
           eta: 'TBD',
@@ -41,7 +41,7 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
           from: 'Kisumu, KE',
           to: 'Kigali, RW',
           cargo: 'Mazao ya Kilimo (15 Tani)',
-          budget: 'KES 120,000',
+          budget: 'UGX 120,000',
           status: 'delivered',
           statusLabel: 'Imefika',
           eta: 'Imekamilika',
@@ -60,7 +60,7 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
           from: 'Nairobi, KE',
           to: 'Kampala, UG',
           cargo: 'Electronics (12 Tons)',
-          budget: 'KES 85,000',
+          budget: 'UGX 85,000',
           status: 'in-transit',
           statusLabel: 'In Transit',
           eta: '4 hours',
@@ -72,7 +72,7 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
           from: 'Mombasa, KE',
           to: 'Dar es Salaam, TZ',
           cargo: 'Marine Products (8 Tons)',
-          budget: 'KES 62,000',
+          budget: 'UGX 62,000',
           status: 'pending',
           statusLabel: 'Awaiting Driver',
           eta: 'TBD',
@@ -84,7 +84,7 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
           from: 'Kisumu, KE',
           to: 'Kigali, RW',
           cargo: 'Agricultural Produce (15 Tons)',
-          budget: 'KES 120,000',
+          budget: 'UGX 120,000',
           status: 'delivered',
           statusLabel: 'Delivered',
           eta: 'Completed',
@@ -265,3 +265,6 @@ export function ShipmentCards({ language }: ShipmentCardsProps) {
     </div>
   );
 }
+
+
+

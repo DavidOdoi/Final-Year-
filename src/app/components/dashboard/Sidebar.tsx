@@ -26,7 +26,7 @@ export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
 
   const content = {
     sw: {
-      logo: 'Safirisha',
+      logo: 'Usafirishaji',
       tagline: 'Dereva',
       menu: [
         { id: 'dashboard', label: 'Dashibodi', icon: LayoutDashboard },
@@ -39,7 +39,7 @@ export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
       ],
     },
     en: {
-      logo: 'Safirisha',
+      logo: 'ELOGISTICA',
       tagline: 'Driver',
       menu: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -210,3 +210,5 @@ export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
     </>
   );
 }
+
+

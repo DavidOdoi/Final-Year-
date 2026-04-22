@@ -22,7 +22,7 @@ export function Navigation({ language, onToggleLanguage }: NavigationProps) {
 
   const content = {
     sw: {
-      logo: 'Safirisha',
+      logo: 'Usafirishaji',
       menu: [
         { label: 'Nyumbani', href: '#hero' },
         { label: 'Huduma', href: '#services' },
@@ -35,7 +35,7 @@ export function Navigation({ language, onToggleLanguage }: NavigationProps) {
       driverLogin: 'Ingia - Dereva',
     },
     en: {
-      logo: 'Safirisha',
+      logo: 'ELOGISTICA',
       menu: [
         { label: 'Home', href: '#hero' },
         { label: 'Services', href: '#services' },
@@ -146,3 +146,5 @@ export function Navigation({ language, onToggleLanguage }: NavigationProps) {
     </motion.nav>
   );
 }
+
+

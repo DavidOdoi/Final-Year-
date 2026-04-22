@@ -121,3 +121,5 @@ export function ActiveTrip({ language }: ActiveTripProps) {
     </motion.div>
   );
 }
+
+

@@ -118,7 +118,7 @@ export function LoadCards({ language }: LoadCardsProps) {
         ? `${load.weight} ${language === 'sw' ? 'ton' : 'tons'}`
         : language === 'sw' ? 'Haijawekwa' : 'Not set';
       const payout = typeof load.price === 'number'
-        ? `KES ${load.price.toLocaleString()}`
+        ? `UGX ${load.price.toLocaleString()}`
         : language === 'sw' ? 'Weka bei' : 'Set price';
       const posted = load.createdAt
         ? formatDistanceToNow(new Date(load.createdAt), { addSuffix: true })
@@ -238,3 +238,5 @@ export function LoadCards({ language }: LoadCardsProps) {
     </div>
   );
 }
+
+

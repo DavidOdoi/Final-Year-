@@ -10,7 +10,7 @@ export function CTASection({ language }: CTASectionProps) {
   const content = {
     sw: {
       title: 'Tayari Kuanza Safari Yako?',
-      subtitle: 'Jiunge na maelfu ya wafanyabiashara na madereva wanaotumia Safirisha kila siku',
+      subtitle: 'Jiunge na maelfu ya wafanyabiashara na madereva wanaotumia Usafirishaji kila siku',
       shipperButton: 'Anza Kusafirisha',
       driverButton: 'Jiunge Kama Dereva',
       shipperBenefit: 'Pata madereva wa kuaminika kwa dakika',
@@ -18,7 +18,7 @@ export function CTASection({ language }: CTASectionProps) {
     },
     en: {
       title: 'Ready to Start Your Journey?',
-      subtitle: 'Join thousands of businesses and drivers using Safirisha every day',
+      subtitle: 'Join thousands of businesses and drivers using ELOGISTICA every day',
       shipperButton: 'Start Shipping',
       driverButton: 'Join as Driver',
       shipperBenefit: 'Get reliable drivers in minutes',
@@ -102,3 +102,5 @@ export function CTASection({ language }: CTASectionProps) {
     </div>
   );
 }
+
+

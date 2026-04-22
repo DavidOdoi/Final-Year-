@@ -29,7 +29,7 @@ export function KPICards({ language }: KPICardsProps) {
         },
         {
           title: 'Mapato ya Leo',
-          value: 'KES 12,450',
+          value: 'UGX 12,450',
           change: '+8%',
           trend: 'up',
           icon: DollarSign,
@@ -69,7 +69,7 @@ export function KPICards({ language }: KPICardsProps) {
         },
         {
           title: "Today's Earnings",
-          value: 'KES 12,450',
+          value: 'UGX 12,450',
           change: '+8%',
           trend: 'up',
           icon: DollarSign,
@@ -142,3 +142,5 @@ export function KPICards({ language }: KPICardsProps) {
     </div>
   );
 }
+
+

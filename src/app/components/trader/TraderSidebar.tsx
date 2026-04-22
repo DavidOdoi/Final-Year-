@@ -28,7 +28,7 @@ export function TraderSidebar({ language, isOpen = false, onClose }: TraderSideb
 
   const content = {
     sw: {
-      logo: 'Safirisha',
+      logo: 'Usafirishaji',
       tagline: 'Mfanyabiashara',
       menu: [
         { id: 'dashboard', label: 'Dashibodi', icon: LayoutDashboard, path: '/trader-dashboard' },
@@ -42,7 +42,7 @@ export function TraderSidebar({ language, isOpen = false, onClose }: TraderSideb
       ],
     },
     en: {
-      logo: 'Safirisha',
+      logo: 'ELOGISTICA',
       tagline: 'Trader',
       menu: [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/trader-dashboard' },
@@ -219,3 +219,5 @@ export function TraderSidebar({ language, isOpen = false, onClose }: TraderSideb
     </>
   );
 }
+
+

@@ -135,9 +135,8 @@ export function OnboardingScreens({ language }: OnboardingScreensProps) {
               <button
                 key={index}
                 onClick={() => setCurrentScreen(index)}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  index === currentScreen ? 'bg-orange-500 w-8' : 'bg-gray-300'
-                }`}
+                className={`w-3 h-3 rounded-full transition-all ${index === currentScreen ? 'bg-orange-500 w-8' : 'bg-gray-300'
+                  }`}
                 aria-label={`Go to screen ${index + 1}`}
               />
             ))}
@@ -147,3 +146,5 @@ export function OnboardingScreens({ language }: OnboardingScreensProps) {
     </div>
   );
 }
+
+

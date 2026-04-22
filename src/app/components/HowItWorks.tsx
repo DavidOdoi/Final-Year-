@@ -334,3 +334,6 @@ export function HowItWorks({ language }: HowItWorksProps) {
     </div>
   );
 }
+
+
+

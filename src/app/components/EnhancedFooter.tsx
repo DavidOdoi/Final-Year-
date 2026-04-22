@@ -8,7 +8,7 @@ interface EnhancedFooterProps {
 export function EnhancedFooter({ language }: EnhancedFooterProps) {
   const content = {
     sw: {
-      tagline: 'Safirisha Mizigo Kwa Urahisi',
+      tagline: 'Usafirishaji Mizigo Kwa Urahisi',
       description: 'Platform ya kwanza ya usafirishaji wa mizigo katika Afrika Mashariki inayounganisha wapelekaji na madereva kwa urahisi.',
       quickLinks: {
         title: 'Viungo vya Haraka',
@@ -30,12 +30,12 @@ export function EnhancedFooter({ language }: EnhancedFooterProps) {
       },
       contact: {
         title: 'Wasiliana',
-        email: 'info@safirisha.com',
+        email: 'info@elogistica.com',
         phone: '+254 700 123 456',
         address: 'Nairobi, Kenya',
       },
       social: 'Tufuate',
-      copyright: '© 2026 Safirisha. Haki zote zimehifadhiwa.',
+      copyright: '© 2026 Usafirishaji. Haki zote zimehifadhiwa.',
     },
     en: {
       tagline: 'Transport Goods Easily',
@@ -60,12 +60,12 @@ export function EnhancedFooter({ language }: EnhancedFooterProps) {
       },
       contact: {
         title: 'Contact',
-        email: 'info@safirisha.com',
+        email: 'info@elogistica.com',
         phone: '+254 700 123 456',
         address: 'Nairobi, Kenya',
       },
       social: 'Follow Us',
-      copyright: '© 2026 Safirisha. All rights reserved.',
+      copyright: '© 2026 ELOGISTICA. All rights reserved.',
     },
   };
 
@@ -175,3 +175,7 @@ export function EnhancedFooter({ language }: EnhancedFooterProps) {
     </footer>
   );
 }
+
+
+
+

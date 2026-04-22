@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Building2, 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Briefcase, 
+import group from '../../assets/images/group.png';
+import {
+  Building2,
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
   Lock,
-  ArrowRight, 
-  ArrowLeft, 
+  ArrowRight,
+  ArrowLeft,
   CheckCircle,
   Sparkles,
   Globe,
@@ -20,7 +21,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { Link } from 'react-router';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
@@ -47,7 +48,7 @@ export default function TraderRegister() {
 
   const content = {
     sw: {
-      title: 'Jiunge na Safirisha',
+      title: 'Jiunge na Usafirishaji',
       subtitle: 'Anza safari yako ya usafirishaji leo',
       step1Title: 'Taarifa za Kampuni',
       step2Title: 'Taarifa za Mawasiliano',
@@ -76,7 +77,7 @@ export default function TraderRegister() {
       ],
     },
     en: {
-      title: 'Join Safirisha',
+      title: 'Join ELOGISTICA',
       subtitle: 'Start your shipping journey today',
       step1Title: 'Company Information',
       step2Title: 'Contact Details',
@@ -109,8 +110,8 @@ export default function TraderRegister() {
   const text = content[language];
 
   const images = [
-    'https://images.unsplash.com/photo-1712700004723-4adc42a3532f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhZnJpY2FuJTIwZnJlaWdodCUyMHRydWNrJTIwbG9hZGVkJTIwZ29vZHN8ZW58MXx8fHwxNzcyNDQwOTA5fDA&ixlib=rb-4.1.0&q=80&w=1080',
-    'https://images.unsplash.com/photo-1586398205986-afd1e041db64?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrZW55YSUyMHRhbnphbmlhJTIwYm9yZGVyJTIwY3Jvc3NpbmclMjB0cnVja3N8ZW58MXx8fHwxNzcyNDQwOTEwfDA&ixlib=rb-4.1.0&q=80&w=1080',
+    group,
+    group,
     'https://images.unsplash.com/photo-1735047974891-df59713d8192?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXJnbyUyMHNoaXBwaW5nJTIwY29udGFpbmVycyUyMHBvcnR8ZW58MXx8fHwxNzcyNDQwOTE4fDA&ixlib=rb-4.1.0&q=80&w=1080',
   ];
 
@@ -533,9 +534,8 @@ export default function TraderRegister() {
                 key={index}
                 initial={{ scale: 0.8 }}
                 animate={{ scale: currentImageIndex === index ? 1.2 : 1 }}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  currentImageIndex === index ? 'bg-[#D4A373]' : 'bg-white/40'
-                }`}
+                className={`w-2 h-2 rounded-full transition-colors ${currentImageIndex === index ? 'bg-[#D4A373]' : 'bg-white/40'
+                  }`}
               />
             ))}
           </div>
@@ -556,7 +556,7 @@ export default function TraderRegister() {
                     whileHover={{ scale: 1.05 }}
                     className="text-3xl text-[#4B2E2B]"
                   >
-                    Safirisha
+                    ELOGISTICA
                   </motion.div>
                 </Link>
                 <motion.button
@@ -674,3 +674,6 @@ export default function TraderRegister() {
     </div>
   );
 }
+
+
+

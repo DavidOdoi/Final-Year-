@@ -10,7 +10,7 @@ export function TraderKPICards({ language }: TraderKPICardsProps) {
     sw: {
       cards: [
         {
-          title: 'Usafirishaji Unaoendelea',
+          title: 'Usafirishaji Unaendelea',
           value: '23',
           change: '+4',
           changeLabel: 'kutoka wiki iliyopita',
@@ -27,7 +27,7 @@ export function TraderKPICards({ language }: TraderKPICardsProps) {
         },
         {
           title: 'Matumizi ya Mwezi',
-          value: 'KES 1.2M',
+          value: 'UGX 1.2M',
           change: '+12%',
           changeLabel: 'kutoka mwezi uliopita',
           icon: DollarSign,
@@ -63,7 +63,7 @@ export function TraderKPICards({ language }: TraderKPICardsProps) {
         },
         {
           title: 'Monthly Spend',
-          value: 'KES 1.2M',
+          value: 'UGX 1.2M',
           change: '+12%',
           changeLabel: 'from last month',
           icon: DollarSign,
@@ -137,3 +137,6 @@ export function TraderKPICards({ language }: TraderKPICardsProps) {
     </div>
   );
 }
+
+
+

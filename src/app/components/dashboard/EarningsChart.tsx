@@ -50,7 +50,7 @@ export function EarningsChart({ language }: EarningsChartProps) {
           <h3 className="text-xl text-[#4B2E2B] mb-1">{text.title}</h3>
           <div className="flex items-center gap-2">
             <span className="text-2xl text-[#D4A373]">
-              KES {totalEarnings.toLocaleString()}
+              UGX {totalEarnings.toLocaleString()}
             </span>
             <div className="flex items-center gap-1 text-xs text-green-600">
               <TrendingUp className="w-3 h-3" />
@@ -82,7 +82,7 @@ export function EarningsChart({ language }: EarningsChartProps) {
                 borderRadius: '12px',
                 padding: '8px 12px',
               }}
-              formatter={(value: number) => [`KES ${value.toLocaleString()}`, text.total]}
+              formatter={(value: number) => [`UGX ${value.toLocaleString()}`, text.total]}
             />
             <defs>
               <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
@@ -123,3 +123,5 @@ export function EarningsChart({ language }: EarningsChartProps) {
     </motion.div>
   );
 }
+
+
