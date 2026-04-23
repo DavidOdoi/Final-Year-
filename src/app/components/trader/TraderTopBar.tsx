@@ -1,7 +1,6 @@
 import { motion } from 'motion/react';
 import { Bell, Wallet, Globe, Menu, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import profilePic from '../../../assets/images/yes.png';
 
 interface TraderTopBarProps {
   language: 'sw' | 'en';
@@ -105,8 +104,9 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               className="w-10 h-10 rounded-full overflow-hidden border-2 border-[#D4A373] shadow-md"
             >
               <ImageWithFallback
-                src={profilePic}
+                src="yes.png"
                 alt="Profile"
+
                 className="w-full h-full object-cover"
               />
             </motion.button>
