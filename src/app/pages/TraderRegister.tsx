@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+
 import group from '../../assets/images/group.png';
 import {
   Building2,
@@ -110,8 +112,8 @@ export default function TraderRegister() {
   const text = content[language];
 
   const images = [
-    group,
-    group,
+    'group',
+    'group',
     'https://images.unsplash.com/photo-1735047974891-df59713d8192?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXJnbyUyMHNoaXBwaW5nJTIwY29udGFpbmVycyUyMHBvcnR8ZW58MXx8fHwxNzcyNDQwOTE4fDA&ixlib=rb-4.1.0&q=80&w=1080',
   ];
 
