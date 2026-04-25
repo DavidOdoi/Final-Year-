@@ -21,9 +21,9 @@ import {
   EyeOff
 } from 'lucide-react';
 import { Link } from 'react-router';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
 export default function TraderRegister() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');

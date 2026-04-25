@@ -18,7 +18,7 @@ import {
 import { Link, useNavigate } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
 export default function TraderLogin() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
@@ -127,7 +127,12 @@ export default function TraderLogin() {
         localStorage.setItem('auth_user', JSON.stringify(data.data.user));
       }
 
-      navigate('/trader-dashboard');
+      const role = data?.data?.user?.role;
+      if (role === 'driver') {
+        navigate('/driver-dashboard');
+      } else {
+        navigate('/trader-dashboard');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : text.loginFailed);
     } finally {
