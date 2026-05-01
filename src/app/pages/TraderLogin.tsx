@@ -12,7 +12,12 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+<<<<<<< HEAD
 import { useAuth } from '../lib/authContext';
+=======
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+>>>>>>> 05d55bce8458fe8671060996a2d4cfd39da985df
 
 export default function TraderLogin() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
@@ -94,7 +99,33 @@ export default function TraderLogin() {
     event.preventDefault();
 
     try {
+<<<<<<< HEAD
       await login(email, password, 'shipper');
+=======
+      const response = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || text.loginFailed);
+      }
+
+      if (data?.data?.token) {
+        localStorage.setItem('auth_token', data.data.token);
+      }
+      if (data?.data?.user) {
+        localStorage.setItem('auth_user', JSON.stringify(data.data.user));
+      }
+
+      const role = data?.data?.user?.role;
+      if (role === 'driver') {
+        navigate('/driver-dashboard');
+      } else {
+        navigate('/trader-dashboard');
+      }
+>>>>>>> 05d55bce8458fe8671060996a2d4cfd39da985df
     } catch (err) {
       console.error('Login error:', err);
     }

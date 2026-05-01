@@ -20,8 +20,15 @@ import {
   TrendingUp,
   User,
 } from 'lucide-react';
+<<<<<<< HEAD
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+=======
+import { Link } from 'react-router';
+import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+>>>>>>> 05d55bce8458fe8671060996a2d4cfd39da985df
 
 export default function TraderRegister() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');

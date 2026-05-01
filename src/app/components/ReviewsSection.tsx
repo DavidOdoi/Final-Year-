@@ -79,17 +79,17 @@ export function ReviewsSection({ language }: ReviewsSectionProps) {
   };
 
   return (
-    <div className="py-20 bg-gray-50">
+    <div className="py-12 bg-white border-y border-gray-200">
       <div className="container mx-auto px-4">
 
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl mb-4">{text.title}</h2>
-          <p className="text-gray-600">{text.subtitle}</p>
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-semibold mb-2">{text.title}</h2>
+          <p className="text-sm text-gray-600">{text.subtitle}</p>
         </div>
 
         {/* Card */}
-        <div className="max-w-5xl mx-auto relative">
+        <div className="max-w-2xl mx-auto relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -97,12 +97,12 @@ export function ReviewsSection({ language }: ReviewsSectionProps) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: direction * -100 }}
               transition={{ duration: 0.4 }}
-              className="bg-white rounded-2xl shadow-xl overflow-hidden"
+              className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
             >
-              <div className="grid md:grid-cols-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
 
-                {/* LEFT: IMAGE (FIXED HEIGHT ✅) */}
-                <div className="h-[10px] md:h-[670px] overflow-hidden">
+                {/* LEFT: IMAGE */}
+                <div className="h-48 md:h-64 overflow-hidden bg-gray-100">
                   <ImageWithFallback
                     src={text.reviews[currentIndex].image}
                     alt={text.reviews[currentIndex].name}
@@ -111,30 +111,30 @@ export function ReviewsSection({ language }: ReviewsSectionProps) {
                 </div>
 
                 {/* RIGHT: TEXT */}
-                <div className="p-8 flex flex-col justify-center">
+                <div className="p-6 md:p-8 flex flex-col justify-center">
 
                   {/* Stars */}
-                  <div className="flex mb-4">
+                  <div className="flex mb-3">
                     {[...Array(text.reviews[currentIndex].rating)].map((_, i) => (
-                      <Star key={i} className="text-yellow-400 fill-yellow-400 w-5 h-5" />
+                      <Star key={i} className="text-yellow-400 fill-yellow-400 w-4 h-4" />
                     ))}
                   </div>
 
                   {/* Review */}
-                  <p className="text-lg text-gray-700 mb-6">
+                  <p className="text-sm md:text-base text-gray-700 mb-4">
                     "{text.reviews[currentIndex].text}"
                   </p>
 
                   {/* Name */}
-                  <div className="font-semibold text-xl">
+                  <div className="font-semibold text-base">
                     {text.reviews[currentIndex].name}
                   </div>
 
-                  <div className="text-orange-600">
+                  <div className="text-gray-600 text-sm">
                     {text.reviews[currentIndex].company}
                   </div>
 
-                  <div className="text-gray-500 text-sm">
+                  <div className="text-gray-500 text-xs">
                     {text.reviews[currentIndex].location}
                   </div>
                 </div>
@@ -146,16 +146,16 @@ export function ReviewsSection({ language }: ReviewsSectionProps) {
           {/* Buttons */}
           <button
             onClick={prevReview}
-            className="absolute left-0 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow"
+            className="absolute left-2 md:left-0 top-1/2 -translate-y-1/2 bg-white border border-gray-300 p-2 rounded-full shadow-sm hover:bg-gray-50"
           >
-            <ChevronLeft />
+            <ChevronLeft className="w-4 h-4" />
           </button>
 
           <button
             onClick={nextReview}
-            className="absolute right-0 top-1/2 -translate-y-1/2 bg-white p-3 rounded-full shadow"
+            className="absolute right-2 md:right-0 top-1/2 -translate-y-1/2 bg-white border border-gray-300 p-2 rounded-full shadow-sm hover:bg-gray-50"
           >
-            <ChevronRight />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

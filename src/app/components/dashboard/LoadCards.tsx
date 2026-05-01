@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Package, ArrowRight, Clock } from 'lucide-react';
+import { MapPin, Package, ArrowRight, Clock, Check, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
 
 interface Load {
   _id?: string;
@@ -36,7 +36,10 @@ export function LoadCards({ language }: LoadCardsProps) {
       loading: 'Inapakia mizigo...',
       empty: 'Hakuna mizigo kwa sasa.',
       error: 'Imeshindwa kupakia mizigo. Jaribu tena.',
-      authRequired: 'Tafadhali ingia ili kuona mizigo.'
+      authRequired: 'Tafadhali ingia ili kuona mizigo.',
+      accepting: 'Inakubali...',
+      accepted: 'Kumekubali!',
+      acceptError: 'Imeshindwa kukubali mzigo.'
     },
     en: {
       title: 'Available Loads',
@@ -49,7 +52,10 @@ export function LoadCards({ language }: LoadCardsProps) {
       loading: 'Loading loads...',
       empty: 'No loads available yet.',
       error: 'Unable to load loads. Please try again.',
-      authRequired: 'Please sign in to view loads.'
+      authRequired: 'Please sign in to view loads.',
+      accepting: 'Accepting...',
+      accepted: 'Accepted!',
+      acceptError: 'Failed to accept load.'
     }
   };
 
@@ -57,6 +63,44 @@ export function LoadCards({ language }: LoadCardsProps) {
   const [loads, setLoads] = useState<Load[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [acceptingLoadId, setAcceptingLoadId] = useState<string | null>(null);
+  const [acceptedLoadId, setAcceptedLoadId] = useState<string | null>(null);
+  const [acceptErrors, setAcceptErrors] = useState<Record<string, string>>({});
+
+  const handleAcceptLoad = useCallback(async (loadId: string) => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setAcceptErrors((prev) => ({ ...prev, [loadId]: text.authRequired }));
+      return;
+    }
+
+    setAcceptingLoadId(loadId);
+    setAcceptErrors((prev) => ({ ...prev, [loadId]: '' }));
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/v1/loads/${loadId}/accept`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const body = await res.json();
+      if (!res.ok) {
+        throw new Error(body?.message || text.acceptError);
+      }
+      setAcceptedLoadId(loadId);
+      setLoads((prev) => prev.filter((l) => l._id !== loadId));
+      window.dispatchEvent(new Event('driver:load-accepted'));
+      setTimeout(() => setAcceptedLoadId(null), 3000);
+    } catch (err) {
+      setAcceptErrors((prev) => ({
+        ...prev,
+        [loadId]: err instanceof Error ? err.message : text.acceptError
+      }));
+    } finally {
+      setAcceptingLoadId(null);
+    }
+  }, [text]);
 
   useEffect(() => {
     let cancelled = false;
@@ -208,13 +252,49 @@ export function LoadCards({ language }: LoadCardsProps) {
 
                 {/* Accept Button */}
                 <motion.button
-                  whileHover={{ scale: 1.02, x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-gradient-to-r from-[#D4A373] to-[#4B2E2B] text-white py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow group"
+                  onClick={() => handleAcceptLoad(load._id || '')}
+                  disabled={acceptingLoadId === load._id}
+                  whileHover={acceptingLoadId !== load._id ? { scale: 1.02, x: 4 } : {}}
+                  whileTap={acceptingLoadId !== load._id ? { scale: 0.98 } : {}}
+                  className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300 ${
+                    acceptedLoadId === load._id
+                      ? 'bg-green-500 text-white'
+                      : acceptingLoadId === load._id
+                      ? 'bg-gray-400 text-white cursor-not-allowed'
+                      : 'bg-gradient-to-r from-[#D4A373] to-[#4B2E2B] text-white group hover:shadow-xl'
+                  }`}
                 >
-                  <span>{text.accept}</span>
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  {acceptedLoadId === load._id ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      <span>{text.accepted}</span>
+                    </>
+                  ) : acceptingLoadId === load._id ? (
+                    <>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      <span>{text.accepting}</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{text.accept}</span>
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
                 </motion.button>
+                {acceptErrors[load._id || ''] && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-2 flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"
+                  >
+                    <AlertCircle className="w-4 h-4" />
+                    <span>{acceptErrors[load._id || '']}</span>
+                  </motion.div>
+                )}
               </div>
             </div>
           </div>
