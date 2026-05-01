@@ -1,11 +1,13 @@
 import { motion } from 'motion/react';
 import { PlusCircle, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router';
 
 interface PostLoadCTAProps {
   language: 'sw' | 'en';
 }
 
 export function PostLoadCTA({ language }: PostLoadCTAProps) {
+  const navigate = useNavigate();
   const content = {
     sw: {
       title: 'Tayari kutuma mzigo?',
@@ -89,6 +91,7 @@ export function PostLoadCTA({ language }: PostLoadCTAProps) {
         <motion.button
           whileHover={{ scale: 1.05, y: -2 }}
           whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/post-load')}
           className="flex items-center gap-3 bg-gradient-to-r from-[#D4A373] to-[#c89563] text-[#4B2E2B] px-8 py-4 rounded-full shadow-2xl hover:shadow-[#D4A373]/50 transition-all duration-300"
         >
           <PlusCircle className="w-6 h-6" />

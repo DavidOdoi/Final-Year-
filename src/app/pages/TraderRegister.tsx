@@ -1,42 +1,37 @@
-import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState } from 'react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-
-import group from '../../assets/images/group.png';
+import { clearStoredSession } from '../lib/api';
+import { Link, useNavigate } from 'react-router';
+import group from '../../assets/images/group.webp';
 import {
-  Building2,
-  User,
-  Mail,
-  Phone,
-  MapPin,
-  Briefcase,
-  Lock,
-  ArrowRight,
   ArrowLeft,
-  CheckCircle,
-  Sparkles,
-  Globe,
-  Shield,
-  Package,
-  TrendingUp,
+  ArrowRight,
+  Briefcase,
+  Building2,
   Eye,
-  EyeOff
+  EyeOff,
+  Globe,
+  Lock,
+  Mail,
+  MapPin,
+  Package,
+  Phone,
+  Shield,
+  TrendingUp,
+  User,
 } from 'lucide-react';
-import { Link } from 'react-router';
-
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
 export default function TraderRegister() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -65,9 +60,6 @@ export default function TraderRegister() {
       next: 'Endelea',
       previous: 'Nyuma',
       submit: 'Wasilisha Ombi',
-      success: 'Hongera!',
-      successMessage: 'Akaunti yako imetengenezwa kwa mafanikio',
-      goToDashboard: 'Nenda kwenye Dashibodi',
       requiredError: 'Tafadhali jaza sehemu zote zinazotakiwa.',
       passwordMismatch: 'Nywila hazifanani.',
       passwordShort: 'Nywila iwe angalau herufi 6.',
@@ -77,6 +69,8 @@ export default function TraderRegister() {
         { title: 'Ufuatiliaji wa Moja kwa Moja', desc: 'Fuatilia mizigo yako wakati wote' },
         { title: 'Malipo Salama', desc: 'M-Pesa, Airtel Money na zaidi' },
       ],
+      signIn: 'Ingia',
+      alreadyHaveAccount: 'Una akaunti tayari?',
     },
     en: {
       title: 'Join ELOGISTICA',
@@ -94,9 +88,6 @@ export default function TraderRegister() {
       next: 'Continue',
       previous: 'Back',
       submit: 'Submit Application',
-      success: 'Congratulations!',
-      successMessage: 'Your account has been created successfully',
-      goToDashboard: 'Go to Dashboard',
       requiredError: 'Please fill in all required fields.',
       passwordMismatch: 'Passwords do not match.',
       passwordShort: 'Password must be at least 6 characters.',
@@ -106,28 +97,12 @@ export default function TraderRegister() {
         { title: 'Live Tracking', desc: 'Track your shipments 24/7' },
         { title: 'Secure Payments', desc: 'M-Pesa, Airtel Money & more' },
       ],
+      signIn: 'Sign in',
+      alreadyHaveAccount: 'Already have an account?',
     },
   };
 
   const text = content[language];
-
-  const images = [
-    'group',
-    'group',
-    'https://images.unsplash.com/photo-1735047974891-df59713d8192?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjYXJnbyUyMHNoaXBwaW5nJTIwY29udGFpbmVycyUyMHBvcnR8ZW58MXx8fHwxNzcyNDQwOTE4fDA&ixlib=rb-4.1.0&q=80&w=1080',
-  ];
-
-  // Auto-rotate images
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [images.length]);
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData({ ...formData, [field]: value });
-  };
 
   const step1Valid = formData.companyName.trim().length > 0 && formData.location.trim().length > 0;
   const step2Valid =
@@ -139,52 +114,64 @@ export default function TraderRegister() {
   const step3Valid = formData.businessType.trim().length > 0 && formData.tradingVolume.trim().length > 0;
   const canProceed = currentStep === 1 ? step1Valid : currentStep === 2 ? step2Valid : step3Valid;
 
-  const handleNext = () => {
+  function handleInputChange(field: keyof typeof formData, value: string) {
+    setFormData((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  function handleNext() {
     setError(null);
+
     if (currentStep === 1 && !step1Valid) {
       setError(text.requiredError);
       return;
     }
+
     if (currentStep === 2 && !step2Valid) {
       if (!formData.contactPerson.trim() || !formData.email.trim() || !formData.phone.trim() || !password || !confirmPassword) {
         setError(text.requiredError);
       } else if (password.length < 6) {
         setError(text.passwordShort);
-      } else if (password !== confirmPassword) {
-        setError(text.passwordMismatch);
       } else {
-        setError(text.requiredError);
+        setError(text.passwordMismatch);
       }
       return;
     }
 
     if (currentStep < 3) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep((current) => current + 1);
     }
-  };
+  }
 
-  const handlePrevious = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const handleSubmit = async () => {
+  function handlePrevious() {
     setError(null);
+    if (currentStep > 1) {
+      setCurrentStep((current) => current - 1);
+    }
+  }
+
+  async function handleSubmit() {
+    setError(null);
+
     if (!step3Valid) {
       setError(text.requiredError);
       return;
     }
-    if (!password || password.length < 6) {
+
+    if (password.length < 6) {
       setError(text.passwordShort);
       return;
     }
+
     if (password !== confirmPassword) {
       setError(text.passwordMismatch);
       return;
     }
 
     setIsSubmitting(true);
+
     try {
       const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
         method: 'POST',
@@ -198,186 +185,159 @@ export default function TraderRegister() {
           email: formData.email,
           phone: formData.phone,
           password,
-          role: 'trader'
-        })
+          role: 'trader',
+        }),
       });
+
       const data = await response.json();
+
       if (!response.ok) {
         throw new Error(data?.message || text.registerFailed);
       }
 
-      if (data?.data?.token) {
-        localStorage.setItem('auth_token', data.data.token);
-      }
-      if (data?.data?.user) {
-        localStorage.setItem('auth_user', JSON.stringify(data.data.user));
-      }
+      clearStoredSession('driver');
+      clearStoredSession('trader');
 
-      setIsSubmitted(true);
+      const nextSearch = new URLSearchParams({
+        registered: '1',
+        email: formData.email,
+      });
+
+      navigate(`/trader-login?${nextSearch.toString()}`, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : text.registerFailed);
+      const errorMessage = err instanceof Error ? err.message : text.registerFailed;
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
-  const renderStepContent = () => {
+  function renderStepContent() {
     switch (currentStep) {
       case 1:
         return (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.companyName} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.companyName} *</label>
               <div className="relative">
-                <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <Building2 className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type="text"
                   value={formData.companyName}
-                  onChange={(e) => handleInputChange('companyName', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  onChange={(event) => handleInputChange('companyName', event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                   placeholder={language === 'sw' ? 'Weka jina la kampuni' : 'Enter company name'}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.location} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.location} *</label>
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <MapPin className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type="text"
                   value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
-                  placeholder={language === 'sw' ? 'Nairobi, Kenya' : 'Nairobi, Kenya'}
+                  onChange={(event) => handleInputChange('location', event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
+                  placeholder="Kampala, Uganda"
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       case 2:
         return (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.contactPerson} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.contactPerson} *</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <User className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type="text"
                   value={formData.contactPerson}
-                  onChange={(e) => handleInputChange('contactPerson', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  onChange={(event) => handleInputChange('contactPerson', event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                   placeholder={language === 'sw' ? 'Jina kamili' : 'Full name'}
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.email} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.email} *</label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <Mail className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  onChange={(event) => handleInputChange('email', event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                   placeholder="email@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.phone} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.phone} *</label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <Phone className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type="tel"
                   value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  onChange={(event) => handleInputChange('phone', event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                   placeholder="+254 700 000 000"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {language === 'sw' ? 'Nywila' : 'Password'} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{language === 'sw' ? 'Nywila' : 'Password'} *</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-12 pr-12 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  onChange={(event) => setPassword(event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-12 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                   placeholder={language === 'sw' ? 'Weka nywila' : 'Enter password'}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4B2E2B]/40 hover:text-[#D4A373] transition-colors"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#4B2E2B]/40 transition-colors hover:text-[#D4A373]"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {language === 'sw' ? 'Thibitisha Nywila' : 'Confirm Password'} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{language === 'sw' ? 'Thibitisha Nywila' : 'Confirm Password'} *</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <Lock className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B]"
+                  onChange={(event) => setConfirmPassword(event.target.value)}
+                  className="w-full rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                   placeholder={language === 'sw' ? 'Rudia nywila' : 'Confirm password'}
                 />
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       case 3:
         return (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
-          >
+          <div className="space-y-6">
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.businessType} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.businessType} *</label>
               <div className="relative">
-                <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <Briefcase className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <select
                   value={formData.businessType}
-                  onChange={(e) => handleInputChange('businessType', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B] appearance-none"
+                  onChange={(event) => handleInputChange('businessType', event.target.value)}
+                  className="w-full appearance-none rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                 >
                   <option value="">{language === 'sw' ? 'Chagua aina' : 'Select type'}</option>
                   <option value="import-export">{language === 'sw' ? 'Kuingiza/Kutoa' : 'Import/Export'}</option>
@@ -390,15 +350,13 @@ export default function TraderRegister() {
             </div>
 
             <div>
-              <label className="block text-sm text-[#4B2E2B] mb-2">
-                {text.tradingVolume} *
-              </label>
+              <label className="mb-2 block text-sm text-[#4B2E2B]">{text.tradingVolume} *</label>
               <div className="relative">
-                <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#4B2E2B]/40" />
+                <TrendingUp className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#4B2E2B]/40" />
                 <select
                   value={formData.tradingVolume}
-                  onChange={(e) => handleInputChange('tradingVolume', e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-white border-2 border-[#4B2E2B]/10 rounded-xl focus:border-[#D4A373] focus:outline-none transition-colors text-[#4B2E2B] appearance-none"
+                  onChange={(event) => handleInputChange('tradingVolume', event.target.value)}
+                  className="w-full appearance-none rounded-xl border-2 border-[#4B2E2B]/10 bg-white py-4 pl-12 pr-4 text-[#4B2E2B] transition-colors focus:border-[#D4A373] focus:outline-none"
                 >
                   <option value="">{language === 'sw' ? 'Chagua kiasi' : 'Select volume'}</option>
                   <option value="0-5">0-5 {language === 'sw' ? 'mizigo' : 'loads'}</option>
@@ -408,207 +366,85 @@ export default function TraderRegister() {
                 </select>
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       default:
         return null;
     }
-  };
-
-  if (isSubmitted) {
-    return (
-      <div className="min-h-screen bg-[#F7EFE9] flex items-center justify-center p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-2xl w-full bg-white rounded-3xl p-8 md:p-12 text-center shadow-2xl"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="w-24 h-24 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6"
-          >
-            <CheckCircle className="w-12 h-12 text-white" />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <h2 className="text-3xl md:text-4xl text-[#4B2E2B] mb-4">{text.success}</h2>
-            <p className="text-lg text-[#4B2E2B]/70 mb-8">{text.successMessage}</p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/trader-dashboard">
-                <motion.button
-                  whileHover={{ scale: 1.05, y: -2 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-8 py-4 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center gap-2 shadow-lg"
-                >
-                  {text.goToDashboard}
-                  <ArrowRight className="w-5 h-5" />
-                </motion.button>
-              </Link>
-            </div>
-          </motion.div>
-
-          {/* Celebration Animation */}
-          <div className="absolute inset-0 pointer-events-none">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 1, y: 0, x: 0 }}
-                animate={{
-                  opacity: 0,
-                  y: -500,
-                  x: Math.random() * 400 - 200,
-                }}
-                transition={{ duration: 2, delay: i * 0.1 }}
-                className="absolute top-1/2 left-1/2"
-              >
-                <Sparkles className="w-6 h-6 text-[#D4A373]" />
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
-    );
   }
 
   return (
-    <div className="min-h-screen bg-[#F7EFE9] relative overflow-hidden">
-      {/* Decorative Background Elements */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-[#D4A373]/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-[#4B2E2B]/5 rounded-full blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden bg-[#F7EFE9]">
+      <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-[#D4A373]/10 blur-3xl" />
+      <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[#4B2E2B]/5 blur-3xl" />
 
-      <div className="relative min-h-screen flex">
-        {/* Left Side - Image Carousel */}
-        <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentImageIndex}
-              initial={{ opacity: 0, scale: 1.1 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.7 }}
-              className="absolute inset-0"
-            >
-              <ImageWithFallback
-                src={images[currentImageIndex]}
-                alt="Freight shipping"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-[#4B2E2B]/80 via-[#4B2E2B]/60 to-transparent" />
-            </motion.div>
-          </AnimatePresence>
+      <div className="relative flex min-h-screen">
+        <div className="relative hidden overflow-hidden lg:block lg:w-1/2">
+          <div className="absolute inset-0">
+            <ImageWithFallback src={group} alt="Freight shipping" className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-br from-[#4B2E2B]/80 via-[#4B2E2B]/60 to-transparent" />
+          </div>
 
-          {/* Feature Cards Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 p-8 space-y-4">
+          <div className="absolute bottom-0 left-0 right-0 space-y-4 p-8">
             {text.features.map((feature, index) => (
-              <motion.div
+              <div
                 key={feature.title}
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.2 }}
-                className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20"
+                className="rounded-2xl border border-white/20 bg-white/10 p-4 backdrop-blur-md"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#D4A373] rounded-lg flex items-center justify-center flex-shrink-0">
-                    {index === 0 && <Shield className="w-5 h-5 text-white" />}
-                    {index === 1 && <MapPin className="w-5 h-5 text-white" />}
-                    {index === 2 && <Package className="w-5 h-5 text-white" />}
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-[#D4A373]">
+                    {index === 0 && <Shield className="h-5 w-5 text-white" />}
+                    {index === 1 && <MapPin className="h-5 w-5 text-white" />}
+                    {index === 2 && <Package className="h-5 w-5 text-white" />}
                   </div>
                   <div>
-                    <div className="text-white font-medium">{feature.title}</div>
-                    <div className="text-white/70 text-sm">{feature.desc}</div>
+                    <div className="font-medium text-white">{feature.title}</div>
+                    <div className="text-sm text-white/70">{feature.desc}</div>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
 
-          {/* Image Indicators */}
           <div className="absolute bottom-8 right-8 flex gap-2">
-            {images.map((_, index) => (
-              <motion.div
-                key={index}
-                initial={{ scale: 0.8 }}
-                animate={{ scale: currentImageIndex === index ? 1.2 : 1 }}
-                className={`w-2 h-2 rounded-full transition-colors ${currentImageIndex === index ? 'bg-[#D4A373]' : 'bg-white/40'
-                  }`}
-              />
-            ))}
+            <div className="h-2 w-2 rounded-full bg-[#D4A373]" />
+            <div className="h-2 w-2 rounded-full bg-white/40" />
+            <div className="h-2 w-2 rounded-full bg-white/40" />
           </div>
         </div>
 
-        {/* Right Side - Registration Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-4 md:p-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-md"
-          >
-            {/* Header */}
+        <div className="flex w-full items-center justify-center p-4 md:p-8 lg:w-1/2">
+          <div className="w-full max-w-md">
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-6">
-                <Link to="/">
-                  <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="text-3xl text-[#4B2E2B]"
-                  >
-                    ELOGISTICA
-                  </motion.div>
+              <div className="mb-6 flex items-center justify-between">
+                <Link to="/" className="text-3xl text-[#4B2E2B]">
+                  ELOGISTICA
                 </Link>
-                <motion.button
-                  whileHover={{ scale: 1.05, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
+                <button
                   onClick={() => setLanguage(language === 'sw' ? 'en' : 'sw')}
-                  className="p-2 hover:bg-white rounded-full transition-colors"
+                  className="rounded-full p-2 transition-colors hover:bg-white"
                 >
-                  <Globe className="w-6 h-6 text-[#4B2E2B]" />
-                </motion.button>
+                  <Globe className="h-6 w-6 text-[#4B2E2B]" />
+                </button>
               </div>
 
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-3xl md:text-4xl text-[#4B2E2B] mb-2"
-              >
-                {text.title}
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-[#4B2E2B]/60"
-              >
-                {text.subtitle}
-              </motion.p>
+              <h1 className="mb-2 text-3xl text-[#4B2E2B] md:text-4xl">{text.title}</h1>
+              <p className="text-[#4B2E2B]/60">{text.subtitle}</p>
             </div>
 
-            {/* Progress Steps */}
             <div className="mb-8">
-              <div className="flex items-center justify-between mb-2">
+              <div className="mb-2 flex items-center justify-between">
                 {[1, 2, 3].map((step) => (
-                  <div key={step} className="flex-1 flex items-center">
-                    <motion.div
-                      animate={{
-                        scale: currentStep === step ? 1.2 : 1,
-                        backgroundColor: currentStep >= step ? '#4B2E2B' : '#E0E0E0',
-                      }}
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-medium"
+                  <div key={step} className="flex flex-1 items-center">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium text-white ${
+                        currentStep >= step ? 'bg-[#4B2E2B]' : 'bg-[#E0E0E0]'
+                      }`}
                     >
                       {step}
-                    </motion.div>
+                    </div>
                     {step < 3 && (
-                      <motion.div
-                        animate={{
-                          backgroundColor: currentStep > step ? '#4B2E2B' : '#E0E0E0',
-                        }}
-                        className="flex-1 h-1 mx-2"
-                      />
+                      <div className={`mx-2 h-1 flex-1 ${currentStep > step ? 'bg-[#4B2E2B]' : 'bg-[#E0E0E0]'}`} />
                     )}
                   </div>
                 ))}
@@ -620,62 +456,41 @@ export default function TraderRegister() {
               </div>
             </div>
 
-            {/* Form Content */}
-            <div className="bg-white rounded-2xl p-6 md:p-8 shadow-lg mb-6">
-              <AnimatePresence mode="wait">
-                {renderStepContent()}
-              </AnimatePresence>
+            <div className="mb-6 rounded-2xl bg-white p-6 shadow-lg md:p-8">
+              {renderStepContent()}
             </div>
 
-            {error && (
-              <div className="mb-4 text-sm text-red-600 text-center">{error}</div>
-            )}
+            {error && <div className="mb-4 text-center text-sm text-red-600">{error}</div>}
 
-            {/* Navigation Buttons */}
             <div className="flex gap-4">
               {currentStep > 1 && (
-                <motion.button
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  whileHover={{ scale: 1.02, x: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                <button
                   onClick={handlePrevious}
-                  className="flex-1 py-4 bg-white border-2 border-[#4B2E2B]/20 text-[#4B2E2B] rounded-xl flex items-center justify-center gap-2 hover:border-[#4B2E2B]/40 transition-colors"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border-2 border-[#4B2E2B]/20 bg-white py-4 text-[#4B2E2B] transition-colors hover:border-[#4B2E2B]/40"
                 >
-                  <ArrowLeft className="w-5 h-5" />
+                  <ArrowLeft className="h-5 w-5" />
                   {text.previous}
-                </motion.button>
+                </button>
               )}
-              <motion.button
-                whileHover={{ scale: 1.02, x: 4 }}
-                whileTap={{ scale: 0.98 }}
+              <button
                 onClick={currentStep === 3 ? handleSubmit : handleNext}
                 disabled={isSubmitting || !canProceed}
-                className="flex-1 py-4 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow disabled:opacity-70 disabled:cursor-not-allowed"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] py-4 text-white shadow-lg transition-opacity disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isSubmitting ? (language === 'sw' ? 'Inatuma...' : 'Submitting...') : (currentStep === 3 ? text.submit : text.next)}
-                <ArrowRight className="w-5 h-5" />
-              </motion.button>
+                {isSubmitting ? (language === 'sw' ? 'Inatuma...' : 'Submitting...') : currentStep === 3 ? text.submit : text.next}
+                <ArrowRight className="h-5 w-5" />
+              </button>
             </div>
 
-            {/* Footer */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-6 text-center text-sm text-[#4B2E2B]/60"
-            >
-              {language === 'sw' ? 'Una akaunti tayari?' : 'Already have an account?'}{' '}
-              <Link to="/trader-login" className="text-[#4B2E2B] hover:text-[#D4A373] transition-colors">
-                {language === 'sw' ? 'Ingia' : 'Sign in'}
+            <div className="mt-6 text-center text-sm text-[#4B2E2B]/60">
+              {text.alreadyHaveAccount}{' '}
+              <Link to="/trader-login" className="text-[#4B2E2B] transition-colors hover:text-[#D4A373]">
+                {text.signIn}
               </Link>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-
-

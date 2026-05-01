@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  LayoutDashboard, 
   Package, 
   Truck, 
   Wallet, 
@@ -11,25 +10,30 @@ import {
   Home,
   X
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
+import type { DriverSection } from './DriverWorkspace';
 
 interface SidebarProps {
   language: 'sw' | 'en';
+  activeItem: DriverSection;
+  onSelect: (section: DriverSection) => void;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
-export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
-  const [activeItem, setActiveItem] = useState('dashboard');
+export function Sidebar({ language, activeItem, onSelect, isOpen = false, onClose }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const content = {
+  const content: Record<
+    'sw' | 'en',
+    { logo: string; tagline: string; menu: Array<{ id: DriverSection; label: string; icon: LucideIcon }> }
+  > = {
     sw: {
       logo: 'Usafirishaji',
       tagline: 'Dereva',
       menu: [
-        { id: 'dashboard', label: 'Dashibodi', icon: LayoutDashboard },
         { id: 'loads', label: 'Mizigo Inayopatikana', icon: Package },
         { id: 'trips', label: 'Safari Zangu', icon: Truck },
         { id: 'earnings', label: 'Mapato', icon: Wallet },
@@ -42,7 +46,6 @@ export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
       logo: 'ELOGISTICA',
       tagline: 'Driver',
       menu: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { id: 'loads', label: 'Available Loads', icon: Package },
         { id: 'trips', label: 'My Trips', icon: Truck },
         { id: 'earnings', label: 'Earnings', icon: Wallet },
@@ -73,11 +76,10 @@ export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
       {/* Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ 
-          x: isOpen || window.innerWidth >= 1024 ? 0 : -256
-        }}
-        transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="fixed left-0 top-0 h-screen bg-white border-r border-[#4B2E2B]/10 shadow-lg z-50 w-64"
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className={`fixed left-0 top-0 z-50 h-screen border-r border-[#4B2E2B]/10 bg-white shadow-lg transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0`}
         style={{ width: isCollapsed ? 80 : 256 }}
       >
         <div className="flex flex-col h-full">
@@ -154,7 +156,10 @@ export function Sidebar({ language, isOpen = false, onClose }: SidebarProps) {
                   key={item.id}
                   whileHover={{ scale: 1.02, x: 4 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => setActiveItem(item.id)}
+                  onClick={() => {
+                    onSelect(item.id);
+                    onClose?.();
+                  }}
                   className={`
                     w-full flex items-center gap-3 px-4 py-3 rounded-xl
                     transition-all duration-200

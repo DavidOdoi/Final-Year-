@@ -34,7 +34,7 @@ import {
 import { TraderSidebar } from '../components/trader/TraderSidebar';
 import { TraderTopBar } from '../components/trader/TraderTopBar';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
 
@@ -56,6 +56,7 @@ interface MatchedDriver {
 }
 
 export default function PostLoad() {
+  const navigate = useNavigate();
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -396,6 +397,12 @@ export default function PostLoad() {
       });
       const data = await response.json();
       if (!response.ok) {
+        // Show detailed validation errors
+        if (data?.errors && Array.isArray(data.errors)) {
+          const errorDetails = data.errors.map((e: any) => `${e.path}: ${e.message}`).join('\n');
+          console.error('Validation errors:', data.errors);
+          throw new Error(`Validation failed:\n${errorDetails}`);
+        }
         throw new Error(data?.message || text.submitError);
       }
 
@@ -693,7 +700,7 @@ export default function PostLoad() {
                               value={formData.pickupCity}
                               onChange={(e) => setFormData({ ...formData, pickupCity: e.target.value })}
                               className="w-full pl-12 pr-4 py-3 bg-[#F7EFE9] border-2 border-transparent rounded-xl focus:border-[#D4A373] focus:bg-white focus:outline-none transition-all text-[#4B2E2B]"
-                              placeholder="e.g., Nairobi"
+                              placeholder="e.g., Kampala"
                             />
                           </div>
                         </div>
@@ -804,7 +811,7 @@ export default function PostLoad() {
                               value={formData.deliveryCity}
                               onChange={(e) => setFormData({ ...formData, deliveryCity: e.target.value })}
                               className="w-full pl-12 pr-4 py-3 bg-[#F7EFE9] border-2 border-transparent rounded-xl focus:border-[#D4A373] focus:bg-white focus:outline-none transition-all text-[#4B2E2B]"
-                              placeholder="e.g., Mombasa"
+                              placeholder="e.g., Jinja"
                             />
                           </div>
                         </div>
@@ -1300,7 +1307,7 @@ export default function PostLoad() {
                     transition={{ delay: 0.6 }}
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => window.location.href = '/trader-dashboard'}
+                    onClick={() => navigate('/trader-dashboard')}
                     className="flex-1 py-3 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl shadow-lg"
                   >
                     {text.viewShipments}

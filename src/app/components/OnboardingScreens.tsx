@@ -37,7 +37,7 @@ export function OnboardingScreens({ language }: OnboardingScreensProps) {
         {
           image: 'https://images.unsplash.com/photo-1758061364787-94220d36bef1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cnVja3MlMjBjcm9zc2luZyUyMGJvcmRlciUyMEFmcmljYXxlbnwxfHx8fDE3NzE4NDA0NzV8MA&ixlib=rb-4.1.0&q=80&w=1080',
           title: 'Regional Reach',
-          description: 'Transport goods seamlessly across East African countries. Our service makes cross-border trade easy and efficient.',
+          description: 'Transport goods seamlessly across Uganda and East African countries. Our service makes trade easy and efficient.',
         },
         {
           image: 'https://images.unsplash.com/photo-1716651333407-545b1336c99b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtb2JpbGUlMjBtb25leSUyMHBheW1lbnQlMjBpbGx1c3RyYXRpb258ZW58MXx8fHwxNzcxODQwNDc5fDA&ixlib=rb-4.1.0&q=80&w=1080',

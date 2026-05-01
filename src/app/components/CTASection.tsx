@@ -86,7 +86,7 @@ export function CTASection({ language }: CTASectionProps) {
             </div>
             <h3 className="text-2xl mb-3">{language === 'sw' ? 'Madereva' : 'For Drivers'}</h3>
             <p className="text-gray-300 mb-6">{text.driverBenefit}</p>
-            <Link to="/driver-dashboard">
+            <Link to="/driver">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}

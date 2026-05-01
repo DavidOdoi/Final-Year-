@@ -13,7 +13,7 @@ import {
   Truck,
   TrendingUp
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 
 interface TraderSidebarProps {
@@ -25,6 +25,24 @@ interface TraderSidebarProps {
 export function TraderSidebar({ language, isOpen = false, onClose }: TraderSidebarProps) {
   const [activeItem, setActiveItem] = useState('dashboard');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : false);
+
+  // Handle screen resize to prevent layout thrashing
+  useEffect(() => {
+    const handleResize = () => {
+      setIsLargeScreen(window.innerWidth >= 1024);
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   const content = {
     sw: {
@@ -78,9 +96,9 @@ export function TraderSidebar({ language, isOpen = false, onClose }: TraderSideb
       <motion.aside
         initial={false}
         animate={{ 
-          x: isOpen || window.innerWidth >= 1024 ? 0 : -256
+          x: isOpen || isLargeScreen ? 0 : -256
         }}
-        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        transition={{ type: "spring", damping: 30, stiffness: 200 }}
         className="fixed left-0 top-0 h-screen bg-white border-r border-[#4B2E2B]/10 shadow-lg z-50 w-64"
         style={{ width: isCollapsed ? 80 : 256 }}
       >

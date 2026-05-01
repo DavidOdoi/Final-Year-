@@ -65,7 +65,7 @@ export function FeaturesSection({ language }: FeaturesSectionProps) {
         {
           icon: Globe,
           title: 'Regional Transport',
-          description: 'Seamless freight journeys across East African countries',
+          description: 'Seamless freight journeys across Uganda and East African countries',
         },
         {
           icon: HeadphonesIcon,

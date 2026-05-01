@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Star, Quote, ChevronLeft, ChevronRight, Verified } from 'lucide-react';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 
-import we from '../../assets/images/we.png';
-import paulImage from '../../assets/images/yes.png';
+import we from '../../assets/images/we.webp';
+import paulImage from '../../assets/images/yes.webp';
 
 interface ReviewsSectionProps {
   language: 'sw' | 'en';
@@ -18,21 +18,21 @@ export function ReviewsSection({ language }: ReviewsSectionProps) {
   const content = {
     en: {
       title: 'What Our Customers Say',
-      subtitle: "Hear how we're transforming businesses across East Africa",
+      subtitle: "Hear how we're transforming businesses across Uganda",
       verified: 'Verified',
       reviews: [
         {
           name: 'Twesigye Eria',
-          company: 'Nairobi Imports Ltd',
-          location: 'Nairobi, Kenya',
+          company: 'Kampala Trading Company',
+          location: 'Kampala, Uganda',
           rating: 5,
           text: 'ELOGISTICA has completely transformed my business. I can now find reliable drivers in minutes.',
           image: we,
         },
         {
           name: 'Paul',
-          company: 'Mombasa Freight Services',
-          location: 'Mombasa, Kenya',
+          company: 'Jinja Freight Solutions',
+          location: 'Jinja, Uganda',
           rating: 5,
           text: 'As a driver, I get more jobs and payments come on time.',
           image: paulImage,
@@ -46,16 +46,16 @@ export function ReviewsSection({ language }: ReviewsSectionProps) {
       reviews: [
         {
           name: 'Tuwesigye Eria',
-          company: 'Nairobi Imports Ltd',
-          location: 'Nairobi, Kenya',
+          company: 'Kampala Trading Company',
+          location: 'Kampala, Uganda',
           rating: 5,
           text: 'Usafirishaji imebadilisha biashara yangu kabisa.',
           image: we,
         },
         {
           name: 'Paul',
-          company: 'Mombasa Freight Services',
-          location: 'Mombasa, Kenya',
+          company: 'Jinja Freight Solutions',
+          location: 'Jinja, Uganda',
           rating: 5,
           text: 'Ninapata kazi zaidi na malipo kwa wakati.',
           image: paulImage,

@@ -1,93 +1,93 @@
 import { motion } from 'motion/react';
 import { Package, TrendingUp, DollarSign, CheckCircle } from 'lucide-react';
+import type { Load } from '../../lib/api';
+import { formatCurrency } from '../../lib/logistics';
 
 interface TraderKPICardsProps {
   language: 'sw' | 'en';
+  loads: Load[];
+  isLoading?: boolean;
 }
 
-export function TraderKPICards({ language }: TraderKPICardsProps) {
+export function TraderKPICards({ language, loads, isLoading = false }: TraderKPICardsProps) {
   const content = {
     sw: {
-      cards: [
-        {
-          title: 'Usafirishaji Unaendelea',
-          value: '23',
-          change: '+4',
-          changeLabel: 'kutoka wiki iliyopita',
-          icon: Package,
-          color: 'from-blue-500 to-blue-600',
-        },
-        {
-          title: 'Mizigo Inayosubiri',
-          value: '8',
-          change: '-2',
-          changeLabel: 'kutoka jana',
-          icon: TrendingUp,
-          color: 'from-orange-500 to-orange-600',
-        },
-        {
-          title: 'Matumizi ya Mwezi',
-          value: 'UGX 1.2M',
-          change: '+12%',
-          changeLabel: 'kutoka mwezi uliopita',
-          icon: DollarSign,
-          color: 'from-green-500 to-green-600',
-        },
-        {
-          title: 'Kiwango cha Wakati',
-          value: '94%',
-          change: '+3%',
-          changeLabel: 'kutoka robo iliyopita',
-          icon: CheckCircle,
-          color: 'from-purple-500 to-purple-600',
-        },
-      ],
+      activeShipments: 'Usafirishaji Unaendelea',
+      pendingLoads: 'Mizigo Inayosubiri',
+      monthlySpend: 'Matumizi ya Mwezi',
+      completionRate: 'Kiwango cha Kukamilika',
+      loading: 'Inapakia takwimu...',
+      activeHint: 'Mizigo iliyopewa dereva au iliyoko njiani',
+      pendingHint: 'Mizigo inayosubiri mpangilio wa dereva',
+      spendHint: 'Jumla ya bei na bajeti za mwezi huu',
+      completionHint: 'Sehemu ya mizigo iliyofikishwa salama',
     },
     en: {
-      cards: [
-        {
-          title: 'Active Shipments',
-          value: '23',
-          change: '+4',
-          changeLabel: 'from last week',
-          icon: Package,
-          color: 'from-blue-500 to-blue-600',
-        },
-        {
-          title: 'Pending Loads',
-          value: '8',
-          change: '-2',
-          changeLabel: 'from yesterday',
-          icon: TrendingUp,
-          color: 'from-orange-500 to-orange-600',
-        },
-        {
-          title: 'Monthly Spend',
-          value: 'UGX 1.2M',
-          change: '+12%',
-          changeLabel: 'from last month',
-          icon: DollarSign,
-          color: 'from-green-500 to-green-600',
-        },
-        {
-          title: 'On-Time Rate',
-          value: '94%',
-          change: '+3%',
-          changeLabel: 'from last quarter',
-          icon: CheckCircle,
-          color: 'from-purple-500 to-purple-600',
-        },
-      ],
+      activeShipments: 'Active Shipments',
+      pendingLoads: 'Pending Loads',
+      monthlySpend: 'Monthly Spend',
+      completionRate: 'Completion Rate',
+      loading: 'Loading metrics...',
+      activeHint: 'Loads already assigned or in transit',
+      pendingHint: 'Loads still waiting for a driver',
+      spendHint: 'Combined prices and budgets this month',
+      completionHint: 'Share of loads delivered successfully',
     },
   };
 
   const text = content[language];
+  const now = new Date();
+  const monthlyLoads = loads.filter((load) => {
+    const rawDate = load.createdAt || load.updatedAt;
+    if (!rawDate) {
+      return false;
+    }
+
+    const date = new Date(rawDate);
+    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  });
+
+  const activeShipments = loads.filter((load) => ['assigned', 'in_transit'].includes(load.status || '')).length;
+  const pendingLoads = loads.filter((load) => (load.status || 'open') === 'open').length;
+  const monthlySpend = monthlyLoads.reduce((sum, load) => sum + (load.price || load.budget || 0), 0);
+  const deliveredLoads = loads.filter((load) => load.status === 'delivered').length;
+  const completionRate = loads.length > 0 ? Math.round((deliveredLoads / loads.length) * 100) : 0;
+
+  const cards = [
+    {
+      title: text.activeShipments,
+      value: isLoading ? text.loading : String(activeShipments),
+      hint: text.activeHint,
+      icon: Package,
+      color: 'from-blue-500 to-blue-600',
+    },
+    {
+      title: text.pendingLoads,
+      value: isLoading ? text.loading : String(pendingLoads),
+      hint: text.pendingHint,
+      icon: TrendingUp,
+      color: 'from-orange-500 to-orange-600',
+    },
+    {
+      title: text.monthlySpend,
+      value: isLoading ? text.loading : formatCurrency(monthlySpend, language, true),
+      hint: text.spendHint,
+      icon: DollarSign,
+      color: 'from-green-500 to-green-600',
+    },
+    {
+      title: text.completionRate,
+      value: isLoading ? text.loading : `${completionRate}%`,
+      hint: text.completionHint,
+      icon: CheckCircle,
+      color: 'from-purple-500 to-purple-600',
+    },
+  ];
 
   return (
     <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-      {text.cards.map((card, index) => {
+      {cards.map((card, index) => {
         const Icon = card.icon;
-        const isPositive = card.change.startsWith('+');
 
         return (
           <motion.div
@@ -107,17 +107,6 @@ export function TraderKPICards({ language }: TraderKPICardsProps) {
               >
                 <Icon className="w-6 h-6 text-white" />
               </motion.div>
-              <motion.div
-                animate={{ scale: [1, 1.1, 1] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                className={`px-2 py-1 rounded-full text-xs ${
-                  isPositive 
-                    ? 'bg-green-100 text-green-700' 
-                    : 'bg-red-100 text-red-700'
-                }`}
-              >
-                {card.change}
-              </motion.div>
             </div>
 
             {/* Value */}
@@ -127,7 +116,7 @@ export function TraderKPICards({ language }: TraderKPICardsProps) {
             </div>
 
             {/* Change Label */}
-            <div className="text-xs text-[#4B2E2B]/40">{card.changeLabel}</div>
+            <div className="text-xs text-[#4B2E2B]/40">{card.hint}</div>
 
             {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D4A373]/5 to-transparent rounded-full -mr-8 -mt-8 blur-2xl" />

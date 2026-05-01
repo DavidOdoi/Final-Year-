@@ -22,16 +22,18 @@ import {
   Sparkles,
   Map as MapIcon,
   List,
-  SlidersHorizontal
+  SlidersHorizontal,
+  MessageSquare,
+  Send
 } from 'lucide-react';
 import { TraderSidebar } from '../components/trader/TraderSidebar';
 import { TraderTopBar } from '../components/trader/TraderTopBar';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import driverImage from '../../assets/images/driver.png';
-import odoiImage from '../../assets/images/odoi.png';
-import onesmusImage from '../../assets/images/onesmus.png';
-import simbaImage from '../../assets/images/simba.png';
-import dorothyImage from '../../assets/images/dorothy.png';
+import driverImage from '../../assets/images/driver.webp';
+import odoiImage from '../../assets/images/odoi.webp';
+import onesmusImage from '../../assets/images/onesmus.webp';
+import simbaImage from '../../assets/images/simba.webp';
+import dorothyImage from '../../assets/images/dorothy.webp';
 
 interface AvailableTruck {
   id: string;
@@ -50,6 +52,9 @@ interface AvailableTruck {
   lng: number;
   verified: boolean;
   returnTrip: boolean;
+  phone: string;
+  whatsapp: string;
+  email: string;
 }
 
 export default function TruckMarketplace() {
@@ -65,6 +70,10 @@ export default function TruckMarketplace() {
   });
   const [showFilters, setShowFilters] = useState(false);
   const [matchScore, setMatchScore] = useState(0);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState('');
+  const [contactMethod, setContactMethod] = useState<'phone' | 'whatsapp' | 'email'>('phone');
 
   const content = {
     sw: {
@@ -99,6 +108,21 @@ export default function TruckMarketplace() {
       tanker: 'Tanki',
       allCapacities: 'Uwezo Wote',
       allLocations: 'Maeneo Yote',
+      bookingTitle: 'Mahitaji ya Kuhifadhi',
+      bookingMessage: 'Tafadhali jaza maelezo yote kwa kuhifadhi',
+      cancel: 'Ghairi',
+      confirm: 'Thibitisha',
+      submit: 'Tuma',
+      enterMessage: 'Weka ujumbe wako',
+      contactTitle: 'Wasiliana na Dereva',
+      phone: 'Simu',
+      whatsapp: 'WhatsApp',
+      email: 'Barua Pepe',
+      sendRequest: 'Tuma Ombi',
+      bookingSuccess: 'Kuhifadhi Kumefanikia!',
+      bookingSuccessMsg: 'Dereva atakupigia simu haraka',
+      contactSuccess: 'Ombi Limetumwa!',
+      contactSuccessMsg: 'Dereva atakugundua ombi lako',
     },
     en: {
       title: 'Truck Marketplace',
@@ -132,6 +156,21 @@ export default function TruckMarketplace() {
       tanker: 'Tanker',
       allCapacities: 'All Capacities',
       allLocations: 'All Locations',
+      bookingTitle: 'Booking Details',
+      bookingMessage: 'Please fill in all details for the booking',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      submit: 'Submit',
+      enterMessage: 'Enter your message',
+      contactTitle: 'Contact Driver',
+      phone: 'Phone',
+      whatsapp: 'WhatsApp',
+      email: 'Email',
+      sendRequest: 'Send Request',
+      bookingSuccess: 'Booking Confirmed!',
+      bookingSuccessMsg: 'Driver will call you soon',
+      contactSuccess: 'Request Sent!',
+      contactSuccessMsg: 'Driver will see your request',
     },
   };
 
@@ -145,8 +184,8 @@ export default function TruckMarketplace() {
       driverPhoto: driverImage,
       truckType: 'Flatbed',
       capacity: '20 tons',
-      currentLocation: 'Dar es Salaam, Tanzania',
-      destination: 'Nairobi, Kenya',
+      currentLocation: 'Malaaba, Uganda',
+      destination: 'Kampala, Uganda',
       availableDate: 'Today',
       distance: 45,
       rating: 4.9,
@@ -156,6 +195,9 @@ export default function TruckMarketplace() {
       lng: 39.2083,
       verified: true,
       returnTrip: true,
+      phone: '0765830691',
+      whatsapp: '0765830691',
+      email: 'mutebezienock91@gmail.com',
     },
     {
       id: '2',
@@ -163,7 +205,7 @@ export default function TruckMarketplace() {
       driverPhoto: odoiImage,
       truckType: 'Container',
       capacity: '30 tons',
-      currentLocation: 'Mombasa, Kenya',
+      currentLocation: 'Jinja, Uganda',
       destination: 'Kampala, Uganda',
       availableDate: 'Tomorrow',
       distance: 78,
@@ -174,6 +216,9 @@ export default function TruckMarketplace() {
       lng: 39.6682,
       verified: true,
       returnTrip: true,
+      phone: '0762107282',
+      whatsapp: '0762107282',
+      email: 'onesmusmwebesa0@gmail.com',
     },
     {
       id: '3',
@@ -181,8 +226,8 @@ export default function TruckMarketplace() {
       driverPhoto: onesmusImage,
       truckType: 'Refrigerated',
       capacity: '15 tons',
-      currentLocation: 'Nairobi, Kenya',
-      destination: 'Kigali, Rwanda',
+      currentLocation: 'Kampala, Uganda',
+      destination: 'Entebbe, Uganda',
       availableDate: 'Today',
       distance: 120,
       rating: 5.0,
@@ -192,6 +237,9 @@ export default function TruckMarketplace() {
       lng: 36.8172,
       verified: true,
       returnTrip: false,
+      phone: '0775411191',
+      whatsapp: '0775411191',
+      email: 'peacemasika8@gmail.com',
     },
     {
       id: '4',
@@ -199,8 +247,8 @@ export default function TruckMarketplace() {
       driverPhoto: simbaImage,
       truckType: 'Tanker',
       capacity: '25 tons',
-      currentLocation: 'Dodoma, Tanzania',
-      destination: 'Nairobi, Kenya',
+      currentLocation: 'Fort Portal, Uganda',
+      destination: 'Kampala, Uganda',
       availableDate: 'In 2 days',
       distance: 95,
       rating: 4.7,
@@ -210,6 +258,9 @@ export default function TruckMarketplace() {
       lng: 35.7516,
       verified: true,
       returnTrip: true,
+      phone: '0784198368',
+      whatsapp: '0784198368',
+      email: 'dorothyniwabiine@gmail.com',
     },
     {
       id: '5',
@@ -217,8 +268,8 @@ export default function TruckMarketplace() {
       driverPhoto: dorothyImage,
       truckType: 'Flatbed',
       capacity: '18 tons',
-      currentLocation: 'Arusha, Tanzania',
-      destination: 'Nairobi, Kenya',
+      currentLocation: 'Soroti, Uganda',
+      destination: 'Kampala, Uganda',
       availableDate: 'Today',
       distance: 35,
       rating: 4.9,
@@ -228,6 +279,9 @@ export default function TruckMarketplace() {
       lng: 36.6830,
       verified: true,
       returnTrip: true,
+      phone: '0747934074',
+      whatsapp: '0747934074',
+      email: 'mutebezienock58@gmail.com',
     },
   ]);
 
@@ -419,10 +473,12 @@ export default function TruckMarketplace() {
                       className="w-full px-4 py-2 bg-[#F7EFE9] border-2 border-transparent rounded-xl focus:border-[#D4A373] focus:outline-none text-[#4B2E2B]"
                     >
                       <option value="all">{text.allLocations}</option>
-                      <option value="kenya">Kenya</option>
-                      <option value="tanzania">Tanzania</option>
-                      <option value="uganda">Uganda</option>
-                      <option value="rwanda">Rwanda</option>
+                      <option value="kampala">Kampala</option>
+                      <option value="jinja">Jinja</option>
+                      <option value="malaaba">Malaaba</option>
+                      <option value="fort-portal">Fort Portal</option>
+                      <option value="soroti">Soroti</option>
+                      <option value="entebbe">Entebbe</option>
                     </select>
                   </div>
                 </motion.div>
@@ -721,7 +777,8 @@ export default function TruckMarketplace() {
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 py-4 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg"
+                  onClick={() => setShowBookingModal(true)}
+                  className="flex-1 py-4 bg-gradient-to-r from-[#4B2E2B] to-[#3a2422] text-white rounded-xl flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-shadow"
                 >
                   <CheckCircle className="w-5 h-5" />
                   {text.requestBooking}
@@ -729,10 +786,288 @@ export default function TruckMarketplace() {
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowContactModal(true)}
                   className="flex-1 py-4 bg-white border-2 border-[#4B2E2B]/20 text-[#4B2E2B] rounded-xl flex items-center justify-center gap-2 hover:border-[#4B2E2B]/40 transition-colors"
                 >
                   <Phone className="w-5 h-5" />
                   {text.contactDriver}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Booking Modal */}
+      <AnimatePresence>
+        {showBookingModal && selectedTruck && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowBookingModal(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <h2 className="text-2xl text-[#4B2E2B] mb-2">{text.bookingTitle}</h2>
+              <p className="text-[#4B2E2B]/60 mb-6">{text.bookingMessage}</p>
+
+              {/* Truck Details Summary */}
+              <div className="bg-gradient-to-br from-[#F7EFE9] to-[#e8dfd7] rounded-2xl p-6 mb-6">
+                <div className="flex items-center gap-4 mb-4">
+                  <ImageWithFallback
+                    src={selectedTruck.driverPhoto}
+                    alt={selectedTruck.driver}
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <div>
+                    <p className="text-lg text-[#4B2E2B]">{selectedTruck.driver}</p>
+                    <p className="text-sm text-[#4B2E2B]/60">{selectedTruck.truckType}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-[#4B2E2B]/10">
+                  <div>
+                    <p className="text-sm text-[#4B2E2B]/60 mb-1">From</p>
+                    <p className="text-[#4B2E2B] font-semibold">{selectedTruck.currentLocation}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#4B2E2B]/60 mb-1">To</p>
+                    <p className="text-[#4B2E2B] font-semibold">{selectedTruck.destination}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#4B2E2B]/60 mb-1">Price</p>
+                    <p className="text-lg text-[#4B2E2B] font-bold">{selectedTruck.price}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#4B2E2B]/60 mb-1">Available</p>
+                    <p className="text-[#4B2E2B] font-semibold">{selectedTruck.availableDate}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Message Input */}
+              <textarea
+                value={bookingMessage}
+                onChange={(e) => setBookingMessage(e.target.value)}
+                placeholder={text.enterMessage}
+                className="w-full p-3 border-2 border-[#4B2E2B]/10 rounded-xl mb-6 focus:border-[#4B2E2B]/30 focus:outline-none resize-none"
+                rows={4}
+              />
+
+              {/* Action Buttons */}
+              <div className="flex gap-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowBookingModal(false)}
+                  className="flex-1 py-3 bg-white border-2 border-[#4B2E2B]/20 text-[#4B2E2B] rounded-xl hover:border-[#4B2E2B]/40 transition-colors"
+                >
+                  {text.cancel}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    console.log('Booking submitted:', { truck: selectedTruck.driver, message: bookingMessage });
+                    setShowBookingModal(false);
+                    setBookingMessage('');
+                  }}
+                  className="flex-1 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  {text.confirm}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Contact Driver Modal */}
+      <AnimatePresence>
+        {showContactModal && selectedTruck && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowContactModal(false)}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            >
+              <h2 className="text-xl text-[#4B2E2B] mb-1">{text.contactTitle}</h2>
+              <p className="text-sm text-[#4B2E2B]/60 mb-4">Choose how to contact {selectedTruck.driver}</p>
+
+              {/* Driver Info */}
+              <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#4B2E2B]/10">
+                <ImageWithFallback
+                  src={selectedTruck.driverPhoto}
+                  alt={selectedTruck.driver}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-[#4B2E2B]">{selectedTruck.driver}</p>
+                  <div className="flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    <span className="text-xs text-[#4B2E2B]/60">{selectedTruck.rating} ({selectedTruck.trips} trips)</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Methods */}
+              <div className="space-y-2 mb-4">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setContactMethod('phone')}
+                  className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-2 text-sm ${
+                    contactMethod === 'phone'
+                      ? 'border-[#4B2E2B] bg-[#F7EFE9]'
+                      : 'border-[#4B2E2B]/20 bg-white hover:border-[#4B2E2B]/40'
+                  }`}
+                >
+                  <Phone className="w-4 h-4 text-[#4B2E2B]" />
+                  <div className="text-left flex-1">
+                    <p className="font-semibold text-[#4B2E2B] text-xs">{text.phone}</p>
+                    <p className="text-xs text-[#4B2E2B]/60">Call directly</p>
+                  </div>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setContactMethod('whatsapp')}
+                  className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-2 text-sm ${
+                    contactMethod === 'whatsapp'
+                      ? 'border-[#4B2E2B] bg-[#F7EFE9]'
+                      : 'border-[#4B2E2B]/20 bg-white hover:border-[#4B2E2B]/40'
+                  }`}
+                >
+                  <MessageSquare className="w-4 h-4 text-[#4B2E2B]" />
+                  <div className="text-left flex-1">
+                    <p className="font-semibold text-[#4B2E2B] text-xs">{text.whatsapp}</p>
+                    <p className="text-xs text-[#4B2E2B]/60">Message via WhatsApp</p>
+                  </div>
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setContactMethod('email')}
+                  className={`w-full p-3 rounded-lg border-2 transition-all flex items-center gap-2 text-sm ${
+                    contactMethod === 'email'
+                      ? 'border-[#4B2E2B] bg-[#F7EFE9]'
+                      : 'border-[#4B2E2B]/20 bg-white hover:border-[#4B2E2B]/40'
+                  }`}
+                >
+                  <Mail className="w-4 h-4 text-[#4B2E2B]" />
+                  <div className="text-left flex-1">
+                    <p className="font-semibold text-[#4B2E2B] text-xs">{text.email}</p>
+                    <p className="text-xs text-[#4B2E2B]/60">Send email</p>
+                  </div>
+                </motion.button>
+              </div>
+
+              {/* Contact Info Display */}
+              {contactMethod === 'phone' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#F7EFE9] rounded-lg p-3 mb-4"
+                >
+                  <p className="text-xs text-[#4B2E2B]/60 mb-2">Driver Phone Number:</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-lg font-bold text-[#4B2E2B]">{selectedTruck.phone}</p>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(selectedTruck.phone);
+                        alert('Phone number copied!');
+                      }}
+                      className="px-3 py-1 bg-[#4B2E2B] text-white text-xs rounded-lg hover:bg-[#3a2422] transition-colors"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {contactMethod === 'whatsapp' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#F7EFE9] rounded-lg p-3 mb-4"
+                >
+                  <p className="text-xs text-[#4B2E2B]/60 mb-2">Optional Message:</p>
+                  <textarea
+                    value={bookingMessage}
+                    onChange={(e) => setBookingMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="w-full p-2 border border-[#4B2E2B]/20 rounded-lg text-sm focus:border-[#4B2E2B]/40 focus:outline-none resize-none"
+                    rows={3}
+                  />
+                </motion.div>
+              )}
+
+              {contactMethod === 'email' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#F7EFE9] rounded-lg p-3 mb-4"
+                >
+                  <p className="text-xs text-[#4B2E2B]/60 mb-2">Email Message:</p>
+                  <textarea
+                    value={bookingMessage}
+                    onChange={(e) => setBookingMessage(e.target.value)}
+                    placeholder="Type your message..."
+                    className="w-full p-2 border border-[#4B2E2B]/20 rounded-lg text-sm focus:border-[#4B2E2B]/40 focus:outline-none resize-none"
+                    rows={3}
+                  />
+                </motion.div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowContactModal(false)}
+                  className="flex-1 py-2 bg-white border-2 border-[#4B2E2B]/20 text-[#4B2E2B] rounded-lg text-sm font-semibold hover:border-[#4B2E2B]/40 transition-colors"
+                >
+                  {text.cancel}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => {
+                    if (contactMethod === 'phone') {
+                      window.location.href = `tel:${selectedTruck.phone}`;
+                    } else if (contactMethod === 'whatsapp') {
+                      const message = encodeURIComponent(bookingMessage || `Hi ${selectedTruck.driver}, I'm interested in your truck service.`);
+                      window.location.href = `https://wa.me/${selectedTruck.whatsapp.replace(/\D/g, '')}?text=${message}`;
+                    } else if (contactMethod === 'email') {
+                      const subject = encodeURIComponent(`Truck Booking Inquiry - ${selectedTruck.driver}`);
+                      const body = encodeURIComponent(bookingMessage || `Hi ${selectedTruck.driver}, I'm interested in your truck service.`);
+                      window.location.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${selectedTruck.email}&su=${subject}&body=${body}`;
+                    }
+                    setShowContactModal(false);
+                    setBookingMessage('');
+                    setContactMethod('phone');
+                  }}
+                  className="flex-1 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center gap-2"
+                >
+                  <Send className="w-4 h-4" />
+                  {text.sendRequest}
                 </motion.button>
               </div>
             </motion.div>

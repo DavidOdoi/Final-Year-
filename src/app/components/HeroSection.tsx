@@ -1,7 +1,7 @@
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
-import truck from '../../assets/images/turck.png';
+import truck from '../../assets/images/turck.webp';
 
 interface HeroSectionProps {
   language: 'sw' | 'en';
@@ -18,7 +18,7 @@ export function HeroSection({ language }: HeroSectionProps) {
     },
     en: {
       headline: 'Transport Goods Easily',
-      subheadline: 'Connect with freight drivers quickly and safely across East Africa',
+      subheadline: 'Connect with freight drivers quickly and safely across Uganda',
       shipperCTA: 'Shipper Register',
       driverCTA: 'Driver Register',
     },
@@ -72,7 +72,7 @@ export function HeroSection({ language }: HeroSectionProps) {
                 {text.shipperCTA}
               </motion.button>
             </Link>
-            <Link to="/driver-dashboard">
+            <Link to="/driver">
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}

@@ -95,7 +95,7 @@ export function Navigation({ language, onToggleLanguage }: NavigationProps) {
             </button>
 
             <Link
-              to="/driver-dashboard"
+              to="/driver/login"
               className="hidden md:block text-orange-600 hover:text-orange-700 border border-orange-600 px-4 py-2 rounded-full hover:bg-orange-50 transition-all"
             >
               {text.driverLogin}
@@ -136,6 +136,13 @@ export function Navigation({ language, onToggleLanguage }: NavigationProps) {
                   {item.label}
                 </a>
               ))}
+              <Link
+                to="/driver/login"
+                className="block rounded-lg border border-orange-600 px-4 py-3 text-center text-orange-600 transition-all hover:bg-orange-50"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {text.driverLogin}
+              </Link>
               <button className="w-full bg-gradient-to-r from-green-600 to-orange-600 text-white px-6 py-3 rounded-lg hover:shadow-lg transition-shadow">
                 {text.cta}
               </button>

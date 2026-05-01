@@ -1,14 +1,23 @@
 import { motion } from 'motion/react';
 import { Bell, Wallet, Globe, Menu, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
+import { formatCurrency } from '../../lib/logistics';
 
 interface TraderTopBarProps {
   language: 'sw' | 'en';
   setLanguage: (value: 'sw' | 'en') => void;
   onMenuClick: () => void;
+  companyName?: string;
+  walletBalance?: number;
 }
 
-export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBarProps) {
+export function TraderTopBar({
+  language,
+  setLanguage,
+  onMenuClick,
+  companyName,
+  walletBalance = 0,
+}: TraderTopBarProps) {
   const content = {
     sw: {
       greeting: 'Karibu tena',
@@ -54,7 +63,7 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               </motion.div>
               <div>
                 <div className="text-sm text-[#4B2E2B]/60">{getCurrentTime()}</div>
-                <div className="text-lg md:text-xl text-[#4B2E2B]">{text.company}</div>
+                <div className="text-lg md:text-xl text-[#4B2E2B]">{companyName || text.company}</div>
               </div>
             </div>
           </div>
@@ -69,7 +78,7 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               <Wallet className="w-4 h-4" />
               <div className="flex flex-col">
                 <span className="text-[10px] opacity-80 hidden md:block">{text.wallet}</span>
-                <span className="text-xs md:text-sm font-medium">UGX 248,500</span>
+                <span className="text-xs md:text-sm font-medium">{formatCurrency(walletBalance, language)}</span>
               </div>
             </motion.div>
 
@@ -90,11 +99,7 @@ export function TraderTopBar({ language, setLanguage, onMenuClick }: TraderTopBa
               className="relative p-2 hover:bg-[#F7EFE9] rounded-full transition-colors"
             >
               <Bell className="w-5 h-5 text-[#4B2E2B]" />
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full border-2 border-white"
-              />
+              <div className="absolute top-1 right-1 w-2 h-2 bg-orange-500 rounded-full border-2 border-white" />
             </motion.button>
 
             {/* Profile */}

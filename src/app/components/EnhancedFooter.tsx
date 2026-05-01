@@ -31,15 +31,15 @@ export function EnhancedFooter({ language }: EnhancedFooterProps) {
       contact: {
         title: 'Wasiliana',
         email: 'info@elogistica.com',
-        phone: '+254 700 123 456',
-        address: 'Nairobi, Kenya',
+        phone: '+256 700 123 456',
+        address: 'Kampala, Uganda',
       },
       social: 'Tufuate',
       copyright: '© 2026 Usafirishaji. Haki zote zimehifadhiwa.',
     },
     en: {
       tagline: 'Transport Goods Easily',
-      description: 'East Africa\'s premier freight platform connecting shippers with drivers seamlessly.',
+      description: 'Uganda\'s premier freight platform connecting shippers with drivers seamlessly.',
       quickLinks: {
         title: 'Quick Links',
         links: [
@@ -61,8 +61,8 @@ export function EnhancedFooter({ language }: EnhancedFooterProps) {
       contact: {
         title: 'Contact',
         email: 'info@elogistica.com',
-        phone: '+254 700 123 456',
-        address: 'Nairobi, Kenya',
+        phone: '+256 700 123 456',
+        address: 'Kampala, Uganda',
       },
       social: 'Follow Us',
       copyright: '© 2026 ELOGISTICA. All rights reserved.',

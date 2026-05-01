@@ -2,11 +2,11 @@ import { motion } from 'framer-motion';
 import { Linkedin, Twitter } from 'lucide-react';
 
 // Import your images correctly
-import CEO from "../../assets/images/CEO.png";
-import odoi from '../../assets/images/odoi.png';
-import onesmus from '../../assets/images/onesmus.png';
-import masikaPeaceImage from '../../assets/images/peace.png';
-import niwabineDorothyImage from '../../assets/images/dorothy.png';
+import CEO from "../../assets/images/CEO.webp";
+import odoi from '../../assets/images/odoi.webp';
+import onesmus from '../../assets/images/onesmus.webp';
+import masikaPeaceImage from '../../assets/images/peace.webp';
+import niwabineDorothyImage from '../../assets/images/dorothy.webp';
 
 interface TeamSectionProps {
   language: 'sw' | 'en';
@@ -49,7 +49,7 @@ export function TeamSection({ language }: TeamSectionProps) {
     en: {
       title: 'Meet Our Team',
       subtitle:
-        'Experts using technology to transform freight logistics in East Africa',
+        'Experts using technology to transform freight logistics in Uganda',
       members: [
         {
           name: 'Mutebezi Enock',

@@ -9,7 +9,7 @@ export function Footer({ language }: FooterProps) {
       copyright: '© 2026 Usafirishaji. Haki zote zimehifadhiwa.',
     },
     en: {
-      tagline: 'Transport Goods Easily - East Africa Freight Service',
+      tagline: 'Transport Goods Easily - Uganda Freight Service',
       copyright: '© 2026 ELOGISTICA. All rights reserved.',
     },
   };

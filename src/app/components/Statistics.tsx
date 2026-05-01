@@ -101,7 +101,7 @@ export function Statistics({ language }: StatisticsProps) {
     },
     en: {
       title: 'Our Impact',
-      subtitle: 'Transforming freight logistics across East Africa',
+      subtitle: 'Transforming freight logistics across Uganda',
       badge: 'Live Statistics',
       stats: [
         {
@@ -121,9 +121,9 @@ export function Statistics({ language }: StatisticsProps) {
           color: 'from-purple-500 to-pink-500',
         },
         {
-          value: 8,
-          suffix: '',
-          label: 'East African Countries',
+          value: 30,
+          suffix: '+',
+          label: 'Uganda Routes',
           subtext: 'Regional network',
           icon: Globe,
           color: 'from-orange-500 to-red-500',

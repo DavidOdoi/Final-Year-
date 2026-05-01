@@ -1,172 +1,192 @@
 import { motion } from 'motion/react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Line, ComposedChart } from 'recharts';
-import { TrendingUp, DollarSign } from 'lucide-react';
+import { BarChart3, MapPin, Package, TrendingUp } from 'lucide-react';
+import type { Load } from '../../lib/api';
+import { formatCurrency, getLoadRoute, getMonthlySpendSeries } from '../../lib/logistics';
 
 interface SpendAnalyticsProps {
   language: 'sw' | 'en';
+  loads: Load[];
+  isLoading?: boolean;
 }
 
-export function SpendAnalytics({ language }: SpendAnalyticsProps) {
+export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnalyticsProps) {
   const content = {
     sw: {
       title: 'Uchambuzi wa Matumizi',
-      period: 'Miezi 6 iliyopita',
-      total: 'Jumla ya Matumizi',
-      average: 'Wastani wa Mwezi',
-      trend: '+18% kutoka mwaka uliopita',
+      subtitle: 'Muhtasari wa miezi sita ya gharama za usafirishaji.',
+      loading: 'Inapakia uchambuzi wa matumizi...',
+      empty: 'Tuma mzigo wako wa kwanza ili kuona mwenendo wa matumizi hapa.',
+      thisMonth: 'Mwezi huu',
+      shipments: 'Mizigo',
+      trend: 'Mabadiliko',
+      busiestLane: 'Njia yenye shughuli zaidi',
+      up: 'juu ya mwezi uliopita',
+      down: 'chini ya mwezi uliopita',
+      steady: 'Hakuna mabadiliko kutoka mwezi uliopita',
+      noLane: 'Hakuna njia bado',
     },
     en: {
       title: 'Spend Analytics',
-      period: 'Last 6 Months',
-      total: 'Total Spend',
-      average: 'Monthly Average',
-      trend: '+18% from last year',
+      subtitle: 'Six-month snapshot of your freight spending.',
+      loading: 'Loading spend analytics...',
+      empty: 'Post your first load to start seeing spend trends here.',
+      thisMonth: 'This month',
+      shipments: 'Shipments',
+      trend: 'Change',
+      busiestLane: 'Busiest lane',
+      up: 'above last month',
+      down: 'below last month',
+      steady: 'No change from last month',
+      noLane: 'No routes yet',
     },
   };
 
   const text = content[language];
 
-  // Mock data for the chart
-  const data = [
-    { month: 'Sep', spend: 850000, shipments: 18 },
-    { month: 'Oct', spend: 920000, shipments: 21 },
-    { month: 'Nov', spend: 780000, shipments: 16 },
-    { month: 'Dec', spend: 1100000, shipments: 25 },
-    { month: 'Jan', spend: 950000, shipments: 20 },
-    { month: 'Feb', spend: 1200000, shipments: 27 },
-  ];
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl bg-white p-6 text-sm text-[#4B2E2B]/60 shadow-md">
+        {text.loading}
+      </div>
+    );
+  }
 
-  const totalSpend = data.reduce((sum, item) => sum + item.spend, 0);
-  const averageSpend = totalSpend / data.length;
+  const series = getMonthlySpendSeries(loads, language);
+  const currentMonth = series[series.length - 1] || { month: '-', spend: 0, shipments: 0 };
+  const previousMonth = series[series.length - 2] || { month: '-', spend: 0, shipments: 0 };
+  const peakSpend = series.reduce((highest, item) => Math.max(highest, item.spend), 0);
+
+  const trendDelta =
+    previousMonth.spend > 0
+      ? Math.round(((currentMonth.spend - previousMonth.spend) / previousMonth.spend) * 100)
+      : currentMonth.spend > 0
+        ? 100
+        : 0;
+
+  const trendLabel =
+    trendDelta > 0
+      ? `${trendDelta}% ${text.up}`
+      : trendDelta < 0
+        ? `${Math.abs(trendDelta)}% ${text.down}`
+        : text.steady;
+
+  const laneMap = new Map<string, { route: string; shipments: number; spend: number }>();
+
+  loads.forEach((load) => {
+    const route = getLoadRoute(load, language);
+    const label = `${route.from} -> ${route.to}`;
+    const current = laneMap.get(label) || { route: label, shipments: 0, spend: 0 };
+
+    current.shipments += 1;
+    current.spend += load.price || load.budget || 0;
+
+    laneMap.set(label, current);
+  });
+
+  const busiestLane =
+    [...laneMap.values()].sort((left, right) => {
+      if (right.shipments !== left.shipments) {
+        return right.shipments - left.shipments;
+      }
+
+      return right.spend - left.spend;
+    })[0] || null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4 }}
-      className="relative bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300 border border-[#4B2E2B]/5"
+      className="relative overflow-hidden rounded-2xl border border-[#4B2E2B]/5 bg-white p-6 shadow-md hover:shadow-xl transition-shadow duration-300"
     >
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
+      <div className="flex items-start justify-between gap-4">
+        <div>
           <h3 className="text-xl text-[#4B2E2B]">{text.title}</h3>
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs"
-          >
-            {text.trend}
-          </motion.div>
+          <p className="mt-1 text-sm text-[#4B2E2B]/60">{text.subtitle}</p>
         </div>
-        <div className="text-sm text-[#4B2E2B]/60">{text.period}</div>
+        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] shadow-lg">
+          <BarChart3 className="h-6 w-6 text-white" />
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <motion.div
-          whileHover={{ y: -2, scale: 1.02 }}
-          className="bg-gradient-to-br from-[#4B2E2B] to-[#3a2422] rounded-xl p-4"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-              <DollarSign className="w-4 h-4 text-[#D4A373]" />
+      {loads.length === 0 ? (
+        <div className="mt-6 rounded-2xl bg-[#F7EFE9] p-4 text-sm text-[#4B2E2B]/65">
+          {text.empty}
+        </div>
+      ) : (
+        <>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <div className="rounded-xl bg-[#F7EFE9] p-4">
+              <div className="text-xs text-[#4B2E2B]/60">{text.thisMonth}</div>
+              <div className="mt-1 text-lg text-[#4B2E2B]">
+                {formatCurrency(currentMonth.spend, language, true)}
+              </div>
             </div>
-            <span className="text-xs text-white/60">{text.total}</span>
-          </div>
-          <div className="text-2xl text-white">
-            UGX {(totalSpend / 1000000).toFixed(1)}M
-          </div>
-        </motion.div>
-
-        <motion.div
-          whileHover={{ y: -2, scale: 1.02 }}
-          className="bg-gradient-to-br from-[#D4A373] to-[#c89563] rounded-xl p-4"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-4 h-4 text-white" />
+            <div className="rounded-xl bg-[#F7EFE9] p-4">
+              <div className="text-xs text-[#4B2E2B]/60">{text.shipments}</div>
+              <div className="mt-1 text-lg text-[#4B2E2B]">{currentMonth.shipments}</div>
             </div>
-            <span className="text-xs text-white/80">{text.average}</span>
           </div>
-          <div className="text-2xl text-white">
-            UGX {Math.round(averageSpend / 1000)}K
+
+          <div className="mt-6">
+            <div className="mb-3 flex items-center justify-between text-xs text-[#4B2E2B]/60">
+              <span>{text.title}</span>
+              <span>{currentMonth.month}</span>
+            </div>
+
+            <div className="flex h-36 items-end gap-3">
+              {series.map((item, index) => {
+                const height = peakSpend > 0 ? Math.max(12, (item.spend / peakSpend) * 100) : 10;
+
+                return (
+                  <div key={`${item.month}-${index}`} className="flex flex-1 flex-col items-center gap-2">
+                    <div className="flex h-full w-full items-end">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${height}%` }}
+                        transition={{ delay: index * 0.08 + 0.1, duration: 0.5 }}
+                        className="w-full rounded-t-xl bg-gradient-to-t from-[#4B2E2B] to-[#D4A373]"
+                        title={`${item.month}: ${formatCurrency(item.spend, language)}`}
+                      />
+                    </div>
+                    <div className="text-[11px] text-[#4B2E2B]/60">{item.month}</div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </motion.div>
-      </div>
 
-      {/* Chart */}
-      <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data}>
-            <defs>
-              <linearGradient id="colorSpend" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#4B2E2B" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#4B2E2B" stopOpacity={0.2}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#4B2E2B" opacity={0.1} />
-            <XAxis 
-              dataKey="month" 
-              stroke="#4B2E2B" 
-              opacity={0.6}
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis 
-              stroke="#4B2E2B" 
-              opacity={0.6}
-              style={{ fontSize: '12px' }}
-              tickFormatter={(value) => `${value / 1000}K`}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #4B2E2B20',
-                borderRadius: '12px',
-                padding: '12px',
-              }}
-              formatter={(value: number, name: string) => {
-                if (name === 'spend') {
-                  return [`UGX ${(value / 1000).toFixed(0)}K`, 'Spend'];
-                }
-                return [value, 'Shipments'];
-              }}
-            />
-            <Bar 
-              dataKey="spend" 
-              fill="url(#colorSpend)" 
-              radius={[8, 8, 0, 0]}
-            />
-            <Line 
-              type="monotone" 
-              dataKey="shipments" 
-              stroke="#D4A373" 
-              strokeWidth={2}
-              dot={{ fill: '#D4A373', r: 4 }}
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
+          <div className="mt-6 space-y-3">
+            <div className="flex items-start gap-3 rounded-xl bg-[#F7EFE9] p-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
+                <TrendingUp className="h-5 w-5 text-[#D4A373]" />
+              </div>
+              <div>
+                <div className="text-xs text-[#4B2E2B]/60">{text.trend}</div>
+                <div className="text-sm text-[#4B2E2B]">{trendLabel}</div>
+              </div>
+            </div>
 
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-[#4B2E2B]/10">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#4B2E2B] rounded-sm" />
-          <span className="text-xs text-[#4B2E2B]/60">
-            {language === 'sw' ? 'Matumizi' : 'Spend'}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-[#D4A373] rounded-sm" />
-          <span className="text-xs text-[#4B2E2B]/60">
-            {language === 'sw' ? 'Usafirishaji' : 'Shipments'}
-          </span>
-        </div>
-      </div>
+            <div className="grid grid-cols-[auto_1fr_auto] items-start gap-3 rounded-xl bg-[#F7EFE9] p-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white">
+                <MapPin className="h-5 w-5 text-[#4B2E2B]" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs text-[#4B2E2B]/60">{text.busiestLane}</div>
+                <div className="truncate text-sm text-[#4B2E2B]">
+                  {busiestLane?.route || text.noLane}
+                </div>
+              </div>
+              <div className="flex items-center gap-1 text-xs text-[#4B2E2B]/60">
+                <Package className="h-3.5 w-3.5" />
+                <span>{busiestLane?.shipments || 0}</span>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
-      {/* Decorative Element */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#D4A373]/5 to-transparent rounded-full -mr-16 -mt-16 blur-3xl" />
+      <div className="absolute right-0 top-0 h-24 w-24 -translate-y-6 translate-x-6 rounded-full bg-gradient-to-br from-[#D4A373]/10 to-transparent blur-2xl" />
     </motion.div>
   );
 }
-
-
-

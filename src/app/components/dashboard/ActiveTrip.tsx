@@ -9,8 +9,8 @@ export function ActiveTrip({ language }: ActiveTripProps) {
   const content = {
     sw: {
       title: 'Safari ya Kazi',
-      from: 'Nairobi',
-      to: 'Mombasa',
+      from: 'Kampala',
+      to: 'Jinja',
       cargo: 'Electronics',
       progress: 65,
       eta: 'ETA: 3 saa 45 dakika',
@@ -20,8 +20,8 @@ export function ActiveTrip({ language }: ActiveTripProps) {
     },
     en: {
       title: 'Active Trip',
-      from: 'Nairobi',
-      to: 'Mombasa',
+      from: 'Kampala',
+      to: 'Jinja',
       cargo: 'Electronics',
       progress: 65,
       eta: 'ETA: 3hrs 45min',

@@ -1,28 +1,56 @@
 import { motion } from 'motion/react';
 import { Bell, Wallet, Globe, Menu } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import profilePic from '../../../assets/images/yes.png';
+import profilePic from '../../../assets/images/yes.webp';
+import { formatCurrency } from '../../lib/logistics';
+
 interface TopBarProps {
   isOnline: boolean;
   setIsOnline: (value: boolean) => void;
   language: 'sw' | 'en';
   setLanguage: (value: 'sw' | 'en') => void;
   onMenuClick: () => void;
+  driverName?: string;
+  walletBalance?: number;
+  currentSectionLabel?: string;
 }
 
-export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuClick }: TopBarProps) {
+function formatMoney(value: number, language: 'sw' | 'en') {
+  if (!Number.isFinite(value) || value <= 0) {
+    return new Intl.NumberFormat(language === 'sw' ? 'sw-KE' : 'en-US', {
+      style: 'currency',
+      currency: 'UGX',
+      maximumFractionDigits: 0,
+    }).format(0);
+  }
+
+  return formatCurrency(value, language);
+}
+
+export function TopBar({
+  isOnline,
+  setIsOnline,
+  language,
+  setLanguage,
+  onMenuClick,
+  driverName,
+  walletBalance = 0,
+  currentSectionLabel,
+}: TopBarProps) {
   const content = {
     sw: {
       greeting: 'Karibu tena',
-      name: 'John Mwangi',
+      name: 'Dereva',
       online: 'Mtandaoni',
       offline: 'Nje ya mtandao',
+      section: 'Sehemu',
     },
     en: {
       greeting: 'Welcome back',
-      name: 'John Mwangi',
+      name: 'Driver',
       online: 'Online',
       offline: 'Offline',
+      section: 'Section',
     },
   };
 
@@ -51,7 +79,12 @@ export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuCli
             </motion.button>
             <div>
               <div className="text-sm text-[#4B2E2B]/60">{getCurrentTime()}</div>
-              <div className="text-xl text-[#4B2E2B]">{text.name}</div>
+              <div className="text-xl text-[#4B2E2B]">{driverName || text.name}</div>
+              {currentSectionLabel && (
+                <div className="text-xs text-[#4B2E2B]/45">
+                  {text.section}: {currentSectionLabel}
+                </div>
+              )}
             </div>
           </div>
 
@@ -80,7 +113,7 @@ export function TopBar({ isOnline, setIsOnline, language, setLanguage, onMenuCli
               className="hidden md:flex items-center gap-2 bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] text-white px-4 py-2 rounded-full shadow-lg"
             >
               <Wallet className="w-4 h-4" />
-              <span className="text-sm">UGX 45,320</span>
+              <span className="text-sm">{formatMoney(walletBalance, language)}</span>
             </motion.div>
 
             {/* Language Toggle */}
