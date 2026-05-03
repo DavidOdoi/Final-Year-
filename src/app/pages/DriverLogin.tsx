@@ -24,7 +24,7 @@ export default function DriverLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { login, isLoading, error, isAuthenticated, user } = useAuth();
+  const { login, isLoading, error, isAuthenticated, user, logout } = useAuth();
   const registeredEmail = searchParams.get('email') || '';
   const showRegisteredMessage = searchParams.get('registered') === '1';
 
@@ -78,12 +78,17 @@ export default function DriverLogin() {
   }, [registeredEmail]);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    // If user is authenticated as a shipper, log them out so they can log in as a driver
+    if (isAuthenticated && user && user.role === 'shipper') {
+      logout();
       return;
     }
 
-    navigate(user.role === 'driver' ? '/driver-dashboard' : '/trader-dashboard', { replace: true });
-  }, [isAuthenticated, navigate, user]);
+    // If user is already authenticated as a driver, redirect to driver dashboard
+    if (isAuthenticated && user && user.role === 'driver') {
+      navigate('/driver-dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate, user, logout]);
 
   async function handleLogin(event: React.FormEvent) {
     event.preventDefault();

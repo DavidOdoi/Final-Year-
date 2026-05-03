@@ -12,7 +12,8 @@ import {
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { BACKEND_URL, clearStoredSession, getAuthToken, getStoredUser } from '../lib/api';
+import { useAuth } from '../lib/authContext';
+import { clearStoredSession, getAuthToken, getStoredUser } from '../lib/api';
 import truckImage from '../../assets/images/turck.webp';
 
 export default function DriverRegister() {
@@ -28,6 +29,7 @@ export default function DriverRegister() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { register, isAuthenticated, user, error: authError } = useAuth();
 
   const content = {
     sw: {
@@ -83,17 +85,27 @@ export default function DriverRegister() {
   const text = content[language];
 
   useEffect(() => {
+    // Check if already authenticated as driver
     const token = getAuthToken('driver');
-    const user = getStoredUser('driver');
+    const storedUser = getStoredUser('driver');
 
-    if (!token || !user) {
+    if (token && storedUser && storedUser.role === 'driver') {
+      navigate('/driver-dashboard', { replace: true });
       return;
     }
 
-    if (user.role === 'driver') {
+    // Check if registration just succeeded via authContext
+    if (isAuthenticated && user && user.role === 'driver') {
       navigate('/driver-dashboard', { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, isAuthenticated, user]);
+
+  useEffect(() => {
+    // Show auth errors from context
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   function updateField(field: keyof typeof formData, value: string) {
     setFormData((current) => ({
@@ -124,34 +136,20 @@ export default function DriverRegister() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
+      // Use authContext register function which handles both local and backend auth
+      await register(
+        formData.name,
+        formData.email,
+        password,
+        'driver',
+        {
           phone: formData.phone,
           location: formData.location,
-          password,
-          role: 'driver',
-        }),
-      });
+        }
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || text.registerFailed);
-      }
-
-      clearStoredSession('driver');
-      clearStoredSession('trader');
-
-      const nextSearch = new URLSearchParams({
-        registered: '1',
-        email: formData.email,
-      });
-
-      navigate(`/driver/login?${nextSearch.toString()}`, { replace: true });
+      // authContext will auto-login the user, redirect to dashboard
+      navigate('/driver-dashboard', { replace: true });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : text.registerFailed;
       setError(errorMessage);

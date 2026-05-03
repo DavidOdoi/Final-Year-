@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { apiRequest, clearStoredSession, getStoredUser, setStoredSession, type AuthUser } from './api';
+import { localRegister as localRegisterFn, localLogin as localLoginFn, localLogout, getLocalUser, isLocalAuthEnabled } from './localAuth';
 
 export type UserRole = 'driver' | 'shipper';
 
@@ -17,7 +18,14 @@ export interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
-  register: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
+  register: (name: string, email: string, password: string, role: UserRole, additionalData?: {
+    phone?: string;
+    location?: string;
+    pricePerKm?: number;
+    companyName?: string;
+    businessType?: string;
+    tradingVolume?: string;
+  }) => Promise<void>;
   logout: () => void;
   error: string | null;
   clearError: () => void;
@@ -63,7 +71,23 @@ function getOtherRole(role: UserRole) {
 }
 
 function getInitialAuthState(): AuthSessionState {
-  const storedUser = getStoredUser('driver') ?? getStoredUser('trader') ?? getStoredUser();
+  // First check if we're using local auth (no backend)
+  if (isLocalAuthEnabled()) {
+    const localUser = getLocalUser();
+    if (localUser) {
+      const normalizedRole = normalizeRole(localUser.role);
+      if (normalizedRole) {
+        return {
+          user: toContextUser(localUser),
+          currentRole: normalizedRole,
+        };
+      }
+    }
+  }
+
+  // Check trader/shipper first to prioritize shipper/trader sessions over driver sessions
+  // This ensures that when a user logs in as a trader, they don't get an old driver session
+  const storedUser = getStoredUser('trader') ?? getStoredUser('driver') ?? getStoredUser();
   const normalizedRole = normalizeRole(storedUser?.role);
 
   if (!storedUser || !normalizedRole) {
@@ -90,6 +114,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setError(null);
 
     try {
+      // Try local auth first if enabled
+      if (isLocalAuthEnabled()) {
+        try {
+          const { user, token } = localLoginFn(email, password, role);
+          clearStoredSession('driver');
+          clearStoredSession('trader');
+          setStoredSession(user, token);
+          const loggedInRole = normalizeRole(user.role);
+          if (loggedInRole) {
+            setSession({
+              user: toContextUser(user),
+              currentRole: loggedInRole,
+            });
+            setIsLoading(false);
+            return;
+          }
+        } catch (localErr) {
+          // If local auth fails, throw the error
+          throw localErr;
+        }
+      }
+
+      // Try backend auth
       const response = await apiRequest<AuthResponseData>('/api/v1/auth/login', {
         method: 'POST',
         body: JSON.stringify({
@@ -117,7 +164,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
       }
 
-      clearStoredSession(getOtherRole(role));
+      // Clear ALL sessions first to prevent stale sessions from being loaded
+      clearStoredSession('driver');
+      clearStoredSession('trader');
       setStoredSession(authData.user, authData.token);
       setSession({
         user: toContextUser(authData.user),
@@ -132,19 +181,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: UserRole) => {
+  const register = async (name: string, email: string, password: string, role: UserRole, additionalData?: {
+    phone?: string;
+    location?: string;
+    pricePerKm?: number;
+    companyName?: string;
+    businessType?: string;
+    tradingVolume?: string;
+  }) => {
     setIsLoading(true);
     setError(null);
 
     try {
+      // Try local auth first if enabled
+      if (isLocalAuthEnabled()) {
+        try {
+          const { user, token } = localRegisterFn({
+            name,
+            email,
+            password,
+            role,
+            phone: additionalData?.phone,
+            location: additionalData?.location,
+            pricePerKm: additionalData?.pricePerKm,
+          });
+          clearStoredSession('driver');
+          clearStoredSession('trader');
+          setStoredSession(user, token);
+          const registeredRole = normalizeRole(user.role);
+          if (registeredRole) {
+            setSession({
+              user: toContextUser(user),
+              currentRole: registeredRole,
+            });
+            setIsLoading(false);
+            return;
+          }
+        } catch (localErr) {
+          // If local auth fails, throw the error
+          throw localErr;
+        }
+      }
+
+      // Try backend auth
+      const requestBody = role === 'driver' 
+        ? { name, email, password, role: 'driver', ...additionalData }
+        : { name, email, password, role: 'trader', ...additionalData };
+
       const response = await apiRequest<AuthResponseData>('/api/v1/auth/register', {
         method: 'POST',
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          role: role === 'driver' ? 'driver' : 'trader',
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const authData = response.data;
@@ -157,11 +243,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Unsupported account role');
       }
 
+      // Clear any existing sessions
       clearStoredSession('driver');
       clearStoredSession('trader');
+      
+      // Set the new session and auto-login the user
+      setStoredSession(authData.user, authData.token);
       setSession({
-        user: null,
-        currentRole: null,
+        user: toContextUser(authData.user),
+        currentRole: registeredRole,
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Registration failed';
@@ -173,6 +263,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
+    // Clear local auth session if using local auth
+    if (isLocalAuthEnabled()) {
+      localLogout();
+    }
     clearStoredSession('driver');
     clearStoredSession('trader');
     setSession({

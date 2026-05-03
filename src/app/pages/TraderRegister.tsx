@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-import { clearStoredSession } from '../lib/api';
 import { Link, useNavigate } from 'react-router';
 import group from '../../assets/images/group.webp';
 import {
@@ -20,15 +19,7 @@ import {
   TrendingUp,
   User,
 } from 'lucide-react';
-<<<<<<< HEAD
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-=======
-import { Link } from 'react-router';
-import { ImageWithFallback } from '../components/figma/ImageWithFallback';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
->>>>>>> 05d55bce8458fe8671060996a2d4cfd39da985df
+import { useAuth } from '../lib/authContext';
 
 export default function TraderRegister() {
   const [language, setLanguage] = useState<'sw' | 'en'>('en');
@@ -39,6 +30,7 @@ export default function TraderRegister() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const [formData, setFormData] = useState({
     companyName: '',
@@ -180,36 +172,26 @@ export default function TraderRegister() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.contactPerson,
-          companyName: formData.companyName,
+      // Use authContext for consistent authentication flow
+      await register(
+        formData.contactPerson,
+        formData.email,
+        password,
+        'shipper',
+        {
+          phone: formData.phone,
           location: formData.location,
+          companyName: formData.companyName,
           businessType: formData.businessType,
           tradingVolume: formData.tradingVolume,
-          email: formData.email,
-          phone: formData.phone,
-          password,
-          role: 'trader',
-        }),
-      });
+        }
+      );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || text.registerFailed);
-      }
-
-      clearStoredSession('driver');
-      clearStoredSession('trader');
-
+      // Redirect to login page with registered flag
       const nextSearch = new URLSearchParams({
         registered: '1',
         email: formData.email,
       });
-
       navigate(`/trader-login?${nextSearch.toString()}`, { replace: true });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : text.registerFailed;

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Navigation, Clock, Truck, Search } from 'lucide-react';
 import type { Load } from '../../lib/api';
@@ -11,6 +11,7 @@ import {
   getLoadTitle,
   getRelativeEta,
 } from '../../lib/logistics';
+import { InteractiveMap, geocodeAddress, type MapLocation } from '../ui/InteractiveMap';
 
 interface TrackingMapProps {
   language: 'sw' | 'en';
@@ -137,6 +138,33 @@ export function TrackingMap({ language, load, isLoading = false }: TrackingMapPr
   const currentLocation = displayLoad.assignedDriver?.currentLocation || route.from;
   const driverName = displayLoad.assignedDriver?.name || text.pendingDriver;
 
+  // Geocode locations for map display
+  const [mapLocations, setMapLocations] = useState<{
+    start?: MapLocation;
+    end?: MapLocation;
+    current?: MapLocation;
+  }>({});
+
+  useEffect(() => {
+    async function geocodeLocations() {
+      if (displayLoad) {
+        const startLoc = displayLoad.pickupLocation || route.from;
+        const endLoc = displayLoad.deliveryLocation || route.to;
+        
+        const [startData, endData] = await Promise.all([
+          geocodeAddress(startLoc),
+          geocodeAddress(endLoc),
+        ]);
+
+        setMapLocations({
+          start: startData || { lat: 0.3476, lng: 32.5825, name: startLoc },
+          end: endData || { lat: 0.3476, lng: 32.5825, name: endLoc },
+        });
+      }
+    }
+    geocodeLocations();
+  }, [displayLoad, route.from, route.to]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -175,56 +203,16 @@ export function TrackingMap({ language, load, isLoading = false }: TrackingMapPr
         <span className="font-medium">{displayLoad.trackingId || displayLoad._id}</span>
       </div>
 
-      <div className="relative w-full h-64 bg-gradient-to-br from-[#F7EFE9] to-[#E8DDD0] rounded-xl overflow-hidden mb-4">
-        <div className="absolute inset-0">
-          <svg className="w-full h-full opacity-20">
-            <defs>
-              <pattern id="tracking-grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#4B2E2B" strokeWidth="0.5" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#tracking-grid)" />
-          </svg>
-        </div>
-
-        <svg className="absolute inset-0 w-full h-full">
-          <motion.path
-            d="M 42 180 Q 135 135, 200 120 T 305 70"
-            fill="none"
-            stroke="#D4A373"
-            strokeWidth="4"
-            strokeDasharray="10 6"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 1.8, ease: 'easeInOut' }}
-          />
-        </svg>
-
-        <div className="absolute left-10 bottom-10">
-          <div className="w-4 h-4 bg-[#4B2E2B] rounded-full border-4 border-white shadow-lg" />
-          <div className="mt-2 text-xs text-[#4B2E2B]">{route.from}</div>
-        </div>
-
-        <div className="absolute right-10 top-10">
-          <div className="w-4 h-4 bg-green-500 rounded-full border-4 border-white shadow-lg" />
-          <div className="mt-2 text-xs text-[#4B2E2B] text-right">{route.to}</div>
-        </div>
-
-        <motion.div
-          initial={{ left: '14%', bottom: '14%' }}
-          animate={{
-            left: [`14%`, `${Math.max(18, progress - 4)}%`],
-            bottom: ['14%', `${Math.min(70, Math.max(28, progress - 2))}%`],
-          }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
-          className="absolute"
-        >
-          <div className="relative">
-            <div className="w-9 h-9 bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] rounded-xl flex items-center justify-center shadow-lg">
-              <Navigation className="w-4 h-4 text-white" />
-            </div>
-          </div>
-        </motion.div>
+      {/* Real OpenStreetMap Integration */}
+      <div className="mb-4">
+        <InteractiveMap
+          language={language}
+          height="300px"
+          startLocation={mapLocations.start}
+          endLocation={mapLocations.end}
+          center={mapLocations.start ? [mapLocations.start.lat, mapLocations.start.lng] : [0.3476, 32.5825]}
+          zoom={8}
+        />
       </div>
 
       <div className="mb-4">
