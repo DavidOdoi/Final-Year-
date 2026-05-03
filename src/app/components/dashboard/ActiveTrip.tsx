@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { MapPin, Phone, Navigation, Clock, Loader } from 'lucide-react';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+import { BACKEND_URL } from '../../lib/api';
 
 interface ActiveTripProps {
   language: 'sw' | 'en';

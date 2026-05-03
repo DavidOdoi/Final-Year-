@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { motion } from 'motion/react';
@@ -101,6 +101,39 @@ function LocationSelector({ onLocationSelect }: { onLocationSelect?: (location: 
   return null;
 }
 
+// Draws a real road route between two points using OSRM (OpenStreetMap routing)
+function RoutePolyline({ start, end }: { start: MapLocation; end: MapLocation }) {
+  const [positions, setPositions] = useState<[number, number][]>([]);
+
+  useEffect(() => {
+    async function fetchRoute() {
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.routes?.[0]?.geometry?.coordinates) {
+          setPositions(
+            data.routes[0].geometry.coordinates.map(([lng, lat]: [number, number]) => [lat, lng])
+          );
+        } else {
+          setPositions([[start.lat, start.lng], [end.lat, end.lng]]);
+        }
+      } catch {
+        setPositions([[start.lat, start.lng], [end.lat, end.lng]]);
+      }
+    }
+    fetchRoute();
+  }, [start.lat, start.lng, end.lat, end.lng]);
+
+  if (positions.length === 0) return null;
+  return (
+    <Polyline
+      positions={positions}
+      pathOptions={{ color: '#4B2E2B', weight: 4, opacity: 0.75, dashArray: '8, 6' }}
+    />
+  );
+}
+
 // Component to update map view
 function MapController({ center, zoom }: { center?: [number, number]; zoom?: number }) {
   const map = useMap();
@@ -177,6 +210,10 @@ export function InteractiveMap({
         )}
 
         <MapController center={center} zoom={zoom} />
+
+        {startLocation && endLocation && (
+          <RoutePolyline start={startLocation} end={endLocation} />
+        )}
 
         {startLocation && (
           <Marker position={[startLocation.lat, startLocation.lng]} icon={startIcon}>

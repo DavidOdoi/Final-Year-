@@ -24,6 +24,11 @@ export function TrackingMap({ language, load, isLoading = false }: TrackingMapPr
   const [trackedLoad, setTrackedLoad] = useState<Load | null>(null);
   const [isTrackingLoading, setIsTrackingLoading] = useState(false);
   const [trackingError, setTrackingError] = useState<string | null>(null);
+  const [mapLocations, setMapLocations] = useState<{
+    start?: MapLocation;
+    end?: MapLocation;
+    current?: MapLocation;
+  }>({});
 
   const content = {
     sw: {
@@ -71,6 +76,26 @@ export function TrackingMap({ language, load, isLoading = false }: TrackingMapPr
     }
     return [...displayLoad.statusHistory].slice(-3).reverse();
   }, [displayLoad]);
+
+  useEffect(() => {
+    async function geocodeLocations() {
+      if (!displayLoad) return;
+      const route = getLoadRoute(displayLoad, language);
+      const startLoc = displayLoad.pickupLocation || route.from;
+      const endLoc = displayLoad.deliveryLocation || route.to;
+
+      const [startData, endData] = await Promise.all([
+        geocodeAddress(startLoc),
+        geocodeAddress(endLoc),
+      ]);
+
+      setMapLocations({
+        start: startData || { lat: 0.3476, lng: 32.5825, name: startLoc },
+        end: endData || { lat: 0.3476, lng: 32.5825, name: endLoc },
+      });
+    }
+    geocodeLocations();
+  }, [displayLoad, language]);
 
   async function handleTrackById(event: React.FormEvent) {
     event.preventDefault();
@@ -137,33 +162,6 @@ export function TrackingMap({ language, load, isLoading = false }: TrackingMapPr
   const progress = getLoadProgress(displayLoad.status);
   const currentLocation = displayLoad.assignedDriver?.currentLocation || route.from;
   const driverName = displayLoad.assignedDriver?.name || text.pendingDriver;
-
-  // Geocode locations for map display
-  const [mapLocations, setMapLocations] = useState<{
-    start?: MapLocation;
-    end?: MapLocation;
-    current?: MapLocation;
-  }>({});
-
-  useEffect(() => {
-    async function geocodeLocations() {
-      if (displayLoad) {
-        const startLoc = displayLoad.pickupLocation || route.from;
-        const endLoc = displayLoad.deliveryLocation || route.to;
-        
-        const [startData, endData] = await Promise.all([
-          geocodeAddress(startLoc),
-          geocodeAddress(endLoc),
-        ]);
-
-        setMapLocations({
-          start: startData || { lat: 0.3476, lng: 32.5825, name: startLoc },
-          end: endData || { lat: 0.3476, lng: 32.5825, name: endLoc },
-        });
-      }
-    }
-    geocodeLocations();
-  }, [displayLoad, route.from, route.to]);
 
   return (
     <motion.div

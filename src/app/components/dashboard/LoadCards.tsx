@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { MapPin, Package, ArrowRight, Clock, Check, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001';
+import { BACKEND_URL } from '../../lib/api';
 
 interface Load {
   _id?: string;

@@ -35,8 +35,7 @@ import { TraderSidebar } from '../components/trader/TraderSidebar';
 import { TraderTopBar } from '../components/trader/TraderTopBar';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { Link, useNavigate } from 'react-router';
-
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+import { BACKEND_URL } from '../lib/api';
 
 interface MatchedDriver {
   id: string;
