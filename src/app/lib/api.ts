@@ -1,4 +1,4 @@
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
+export const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
 export type UserRole = 'trader' | 'shipper' | 'driver' | 'admin' | 'customer' | 'staff';
 export type PlatformRole = 'customer' | 'staff' | 'admin';
