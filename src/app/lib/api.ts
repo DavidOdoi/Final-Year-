@@ -1,4 +1,5 @@
-export const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+if (!import.meta.env.VITE_API_URL) console.warn('VITE_API_URL is not set!');
+export const BACKEND_URL = import.meta.env.VITE_API_URL || '';
 
 export type UserRole = 'trader' | 'shipper' | 'driver' | 'admin' | 'customer' | 'staff';
 export type PlatformRole = 'customer' | 'staff' | 'admin';
