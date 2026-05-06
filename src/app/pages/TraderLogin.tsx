@@ -10,7 +10,7 @@ import {
   CheckCircle2,
   LogIn,
 } from 'lucide-react';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 import { useAuth } from '../lib/authContext';
 
@@ -82,28 +82,28 @@ export default function TraderLogin() {
     setEmail((current) => current || registeredEmail);
   }, [registeredEmail]);
 
+  // If a driver session is open, clear it so they can log in as a trader
   useEffect(() => {
-    // If user is authenticated as a driver, log them out so they can log in as a trader
     if (isAuthenticated && user && user.role === 'driver') {
       logout();
-      return;
     }
-
-    // If user is already authenticated as a shipper/trader, redirect to trader dashboard
-    if (isAuthenticated && user && user.role === 'shipper') {
-      navigate('/trader-dashboard', { replace: true });
-    }
-  }, [isAuthenticated, navigate, user, logout]);
+  }, [isAuthenticated, user, logout]);
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
 
     try {
       await login(email, password, 'shipper');
+      navigate('/trader-dashboard', { replace: true });
     } catch (err) {
       console.error('Login error:', err);
     }
   };
+
+  // Already authenticated as a trader — skip the login page entirely
+  if (isAuthenticated && user && user.role === 'shipper') {
+    return <Navigate to="/trader-dashboard" replace />;
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#F7EFE9]">

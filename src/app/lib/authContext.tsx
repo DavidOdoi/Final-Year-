@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import { apiRequest, clearStoredSession, getStoredUser, setStoredSession, type AuthUser } from './api';
 import { localRegister as localRegisterFn, localLogin as localLoginFn, localLogout, getLocalUser, isLocalAuthEnabled } from './localAuth';
 
@@ -262,19 +262,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const logout = () => {
-    // Clear local auth session if using local auth
+  const logout = useCallback(() => {
     if (isLocalAuthEnabled()) {
       localLogout();
     }
     clearStoredSession('driver');
     clearStoredSession('trader');
-    setSession({
-      user: null,
-      currentRole: null,
-    });
+    setSession({ user: null, currentRole: null });
     setError(null);
-  };
+  }, []);
 
   const clearError = () => {
     setError(null);
