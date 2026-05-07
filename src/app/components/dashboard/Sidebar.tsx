@@ -1,10 +1,9 @@
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Package, 
-  Truck, 
-  Wallet, 
-  FileText, 
-  Star, 
+import {
+  Package,
+  Truck,
+  FileText,
+  Star,
   Settings,
   ChevronLeft,
   Home,
@@ -36,7 +35,6 @@ export function Sidebar({ language, activeItem, onSelect, isOpen = false, onClos
       menu: [
         { id: 'loads', label: 'Mizigo Inayopatikana', icon: Package },
         { id: 'trips', label: 'Safari Zangu', icon: Truck },
-        { id: 'earnings', label: 'Mapato', icon: Wallet },
         { id: 'documents', label: 'Nyaraka', icon: FileText },
         { id: 'ratings', label: 'Ukaguzi', icon: Star },
         { id: 'settings', label: 'Mipangilio', icon: Settings },
@@ -48,7 +46,6 @@ export function Sidebar({ language, activeItem, onSelect, isOpen = false, onClos
       menu: [
         { id: 'loads', label: 'Available Loads', icon: Package },
         { id: 'trips', label: 'My Trips', icon: Truck },
-        { id: 'earnings', label: 'Earnings', icon: Wallet },
         { id: 'documents', label: 'Documents', icon: FileText },
         { id: 'ratings', label: 'Ratings', icon: Star },
         { id: 'settings', label: 'Settings', icon: Settings },

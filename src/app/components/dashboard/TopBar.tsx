@@ -1,8 +1,7 @@
 import { motion } from 'motion/react';
-import { Bell, Wallet, Globe, Menu } from 'lucide-react';
+import { Bell, Globe, Menu } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
 import profilePic from '../../../assets/images/yes.webp';
-import { formatCurrency } from '../../lib/logistics';
 
 interface TopBarProps {
   isOnline: boolean;
@@ -11,20 +10,7 @@ interface TopBarProps {
   setLanguage: (value: 'sw' | 'en') => void;
   onMenuClick: () => void;
   driverName?: string;
-  walletBalance?: number;
   currentSectionLabel?: string;
-}
-
-function formatMoney(value: number, language: 'sw' | 'en') {
-  if (!Number.isFinite(value) || value <= 0) {
-    return new Intl.NumberFormat(language === 'sw' ? 'sw-KE' : 'en-US', {
-      style: 'currency',
-      currency: 'UGX',
-      maximumFractionDigits: 0,
-    }).format(0);
-  }
-
-  return formatCurrency(value, language);
 }
 
 export function TopBar({
@@ -34,7 +20,6 @@ export function TopBar({
   setLanguage,
   onMenuClick,
   driverName,
-  walletBalance = 0,
   currentSectionLabel,
 }: TopBarProps) {
   const content = {
@@ -105,15 +90,6 @@ export function TopBar({
               >
                 {isOnline ? text.online : text.offline}
               </button>
-            </motion.div>
-
-            {/* Wallet */}
-            <motion.div
-              whileHover={{ scale: 1.02, y: -2 }}
-              className="hidden md:flex items-center gap-2 bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] text-white px-4 py-2 rounded-full shadow-lg"
-            >
-              <Wallet className="w-4 h-4" />
-              <span className="text-sm">{formatMoney(walletBalance, language)}</span>
             </motion.div>
 
             {/* Language Toggle */}

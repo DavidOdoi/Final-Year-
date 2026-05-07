@@ -7,7 +7,6 @@ import {
   Calendar,
   CheckCircle2,
   Clock3,
-  CreditCard,
   FileText,
   MapPin,
   Package,
@@ -17,23 +16,19 @@ import {
   Star,
   Truck,
   Upload,
-  Wallet,
 } from 'lucide-react';
 import type { AuthUser, Load } from '../../lib/api';
 import {
-  formatCurrency,
   formatWeight,
   getLoadProgress,
   getLoadRoute,
   getLoadStatusLabel,
   getLoadTitle,
-  getLoadValue,
   getNextLoadStatus,
   getRelativeEta,
-  getWeeklyEarningsSeries,
 } from '../../lib/logistics';
 
-export type DriverSection = 'loads' | 'trips' | 'earnings' | 'documents' | 'ratings' | 'settings';
+export type DriverSection = 'loads' | 'trips' | 'documents' | 'ratings' | 'settings';
 
 export interface DriverDocument {
   id: string;
@@ -55,13 +50,11 @@ export interface DriverSettings {
   homeBase: string;
   truckTypes: string;
   languages: string;
-  paymentMethod: 'M-Pesa' | 'Airtel Money' | 'Bank';
   preferredLanguage: 'sw' | 'en';
   autoAccept: boolean;
   shareLocation: boolean;
   notifications: {
     newLoads: boolean;
-    payouts: boolean;
     ratings: boolean;
   };
 }
@@ -81,20 +74,6 @@ interface DriverWorkspaceProps {
   onUploadDocument: (documentId: string, file: File | null) => void;
   onSettingsChange: (next: DriverSettings) => void;
   onSaveSettings: () => void;
-  onWithdraw: () => void;
-}
-
-function formatMoney(value: number, language: 'sw' | 'en', compact = false) {
-  if (!Number.isFinite(value) || value <= 0) {
-    return new Intl.NumberFormat(language === 'sw' ? 'sw-KE' : 'en-US', {
-      style: 'currency',
-      currency: 'UGX',
-      notation: compact ? 'compact' : 'standard',
-      maximumFractionDigits: compact ? 1 : 0,
-    }).format(0);
-  }
-
-  return formatCurrency(value, language, compact);
 }
 
 function getRelativeTime(value: string | undefined, language: 'sw' | 'en') {
@@ -150,11 +129,9 @@ function LoadsSection({
       loading: 'Inapakia mizigo ya dereva...',
       accept: 'Kubali Mzigo',
       route: 'Njia',
-      payout: 'Malipo',
       weight: 'Uzito',
       posted: 'Ilipostwa',
       openCount: 'Mizigo ya wazi',
-      totalValue: 'Jumla ya malipo',
     },
     en: {
       title: 'Available Loads',
@@ -163,16 +140,13 @@ function LoadsSection({
       loading: 'Loading available driver loads...',
       accept: 'Accept Load',
       route: 'Route',
-      payout: 'Payout',
       weight: 'Weight',
       posted: 'Posted',
       openCount: 'Open loads',
-      totalValue: 'Potential payout',
     },
   };
 
   const text = content[language];
-  const potentialValue = loads.reduce((sum, load) => sum + getLoadValue(load), 0);
 
   return (
     <>
@@ -182,10 +156,6 @@ function LoadsSection({
         <div className="rounded-2xl bg-white p-5 shadow-md">
           <div className="text-xs text-[#4B2E2B]/55">{text.openCount}</div>
           <div className="mt-2 text-3xl text-[#4B2E2B]">{loads.length}</div>
-        </div>
-        <div className="rounded-2xl bg-white p-5 shadow-md">
-          <div className="text-xs text-[#4B2E2B]/55">{text.totalValue}</div>
-          <div className="mt-2 text-3xl text-[#4B2E2B]">{formatMoney(potentialValue, language, true)}</div>
         </div>
       </div>
 
@@ -199,7 +169,6 @@ function LoadsSection({
         <div className="space-y-4">
           {loads.map((load, index) => {
             const route = getLoadRoute(load, language);
-            const amount = formatMoney(getLoadValue(load), language);
 
             return (
               <motion.div
@@ -220,7 +189,7 @@ function LoadsSection({
 
                     <h3 className="mt-3 text-xl text-[#4B2E2B]">{getLoadTitle(load, language)}</h3>
 
-                    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="rounded-xl bg-[#F7EFE9] p-4">
                         <div className="text-xs text-[#4B2E2B]/55">{text.route}</div>
                         <div className="mt-2 flex items-center gap-2 text-sm text-[#4B2E2B]">
@@ -237,11 +206,6 @@ function LoadsSection({
                           <Package className="h-4 w-4 text-[#D4A373]" />
                           <span>{formatWeight(load.weight, language)}</span>
                         </div>
-                      </div>
-
-                      <div className="rounded-xl bg-[#F7EFE9] p-4">
-                        <div className="text-xs text-[#4B2E2B]/55">{text.payout}</div>
-                        <div className="mt-2 text-sm text-[#4B2E2B]">{amount}</div>
                       </div>
                     </div>
                   </div>
@@ -392,10 +356,6 @@ function TripsSection({
                           <span>{getRelativeEta(load, language)}</span>
                         </div>
 
-                        <div className="mt-3 text-sm text-[#4B2E2B]">
-                          {formatMoney(getLoadValue(load), language)}
-                        </div>
-
                         {nextStatus && load._id && (
                           <motion.button
                             whileHover={{ scale: 1.02 }}
@@ -454,9 +414,6 @@ function TripsSection({
                         {`${route.from} -> ${route.to}`}
                       </div>
                     </div>
-                    <div className="text-right text-sm text-[#4B2E2B]">
-                      {formatMoney(getLoadValue(load), language)}
-                    </div>
                   </div>
                 </motion.div>
               );
@@ -464,154 +421,6 @@ function TripsSection({
           )}
         </div>
       </div>
-    </>
-  );
-}
-
-function EarningsSection({
-  language,
-  loads,
-  onWithdraw,
-}: {
-  language: 'sw' | 'en';
-  loads: Load[];
-  onWithdraw: () => void;
-}) {
-  const content = {
-    sw: {
-      title: 'Mapato',
-      subtitle: 'Fuatilia malipo yaliyopatikana, yanayosubiri, na mwenendo wa wiki hii.',
-      available: 'Salio linaloweza kutolewa',
-      pending: 'Yanayosubiri',
-      completed: 'Safari zilizolipwa',
-      avg: 'Wastani kwa safari',
-      thisWeek: 'Wiki hii',
-      withdraw: 'Omba malipo',
-      empty: 'Mapato yako yataonekana hapa ukikamilisha safari.',
-    },
-    en: {
-      title: 'Earnings',
-      subtitle: 'Track paid work, pending payouts, and your weekly earnings trend.',
-      available: 'Available balance',
-      pending: 'Pending payout',
-      completed: 'Paid trips',
-      avg: 'Average per trip',
-      thisWeek: 'This week',
-      withdraw: 'Request payout',
-      empty: 'Your earnings will appear here after completed trips.',
-    },
-  };
-
-  const text = content[language];
-  const completedLoads = loads.filter((load) => load.status === 'delivered');
-  const pendingLoads = loads.filter((load) => ['assigned', 'in_transit'].includes(load.status || ''));
-  const availableBalance = completedLoads.reduce((sum, load) => sum + getLoadValue(load), 0);
-  const pendingBalance = pendingLoads.reduce((sum, load) => sum + getLoadValue(load), 0);
-  const averageTripValue = completedLoads.length > 0 ? availableBalance / completedLoads.length : 0;
-  const series = getWeeklyEarningsSeries(completedLoads, language);
-  const maxAmount = series.reduce((highest, item) => Math.max(highest, item.amount), 0);
-
-  return (
-    <>
-      <SectionIntro
-        title={text.title}
-        subtitle={text.subtitle}
-        action={
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onWithdraw}
-            className="inline-flex items-center gap-2 rounded-xl bg-[#4B2E2B] px-4 py-3 text-sm text-white"
-          >
-            <Wallet className="h-4 w-4" />
-            <span>{text.withdraw}</span>
-          </motion.button>
-        }
-      />
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {[
-          { label: text.available, value: formatMoney(availableBalance, language), icon: Wallet },
-          { label: text.pending, value: formatMoney(pendingBalance, language), icon: CreditCard },
-          { label: text.completed, value: String(completedLoads.length), icon: CheckCircle2 },
-          { label: text.avg, value: formatMoney(averageTripValue, language, true), icon: Truck },
-        ].map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <div key={item.label} className="rounded-2xl bg-white p-5 shadow-md">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-[#4B2E2B]/55">{item.label}</div>
-                <div className="rounded-xl bg-[#F7EFE9] p-2 text-[#D4A373]">
-                  <Icon className="h-4 w-4" />
-                </div>
-              </div>
-              <div className="mt-3 text-2xl text-[#4B2E2B]">{item.value}</div>
-            </div>
-          );
-        })}
-      </div>
-
-      {completedLoads.length === 0 ? (
-        <div className="mt-6">
-          <StateCard text={text.empty} />
-        </div>
-      ) : (
-        <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_1fr]">
-          <div className="rounded-2xl bg-white p-6 shadow-md">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="text-lg text-[#4B2E2B]">{text.thisWeek}</div>
-              <div className="text-sm text-[#4B2E2B]/55">{formatMoney(availableBalance, language, true)}</div>
-            </div>
-
-            <div className="flex h-56 items-end gap-3">
-              {series.map((item) => {
-                const height = maxAmount > 0 ? Math.max(10, (item.amount / maxAmount) * 100) : 10;
-
-                return (
-                  <div key={item.day} className="flex flex-1 flex-col items-center gap-2">
-                    <div className="flex h-full w-full items-end">
-                      <div
-                        className="w-full rounded-t-xl bg-gradient-to-t from-[#4B2E2B] to-[#D4A373]"
-                        style={{ height: `${height}%` }}
-                        title={`${item.day}: ${formatMoney(item.amount, language)}`}
-                      />
-                    </div>
-                    <div className="text-xs text-[#4B2E2B]/55">{item.day}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            {completedLoads.slice(0, 5).map((load, index) => {
-              const route = getLoadRoute(load, language);
-
-              return (
-                <motion.div
-                  key={load._id || `${route.from}-${route.to}-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="rounded-2xl bg-white p-5 shadow-md"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2 text-xs text-[#4B2E2B]/55">
-                        <Calendar className="h-4 w-4" />
-                        <span>{getRelativeTime(load.updatedAt || load.createdAt, language)}</span>
-                      </div>
-                      <div className="mt-2 text-base text-[#4B2E2B]">{`${route.from} -> ${route.to}`}</div>
-                    </div>
-                    <div className="text-sm text-[#4B2E2B]">{formatMoney(getLoadValue(load), language)}</div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -965,19 +774,16 @@ function SettingsSection({
   const content = {
     sw: {
       title: 'Mipangilio',
-      subtitle: 'Boresha taarifa zako za dereva, malipo, na jinsi unavyopokea arifa.',
+      subtitle: 'Boresha taarifa zako za dereva na jinsi unavyopokea arifa.',
       profile: 'Taarifa za wasifu',
-      payout: 'Malipo',
       notifications: 'Arifa',
       displayName: 'Jina la kuonyesha',
       phone: 'Namba ya simu',
       homeBase: 'Makazi / kituo',
       truckTypes: 'Aina za lori',
       languages: 'Lugha',
-      paymentMethod: 'Njia ya malipo',
       preferredLanguage: 'Lugha ya programu',
       newLoads: 'Nijulishe mizigo mipya',
-      payouts: 'Nijulishe malipo',
       ratings: 'Nijulishe ukaguzi mpya',
       autoAccept: 'Ruhusu mapendekezo ya kukubali mizigo',
       shareLocation: 'Shiriki eneo langu la sasa',
@@ -985,19 +791,16 @@ function SettingsSection({
     },
     en: {
       title: 'Settings',
-      subtitle: 'Update your driver profile, payouts, and how you receive notifications.',
+      subtitle: 'Update your driver profile and how you receive notifications.',
       profile: 'Profile details',
-      payout: 'Payout preferences',
       notifications: 'Notifications',
       displayName: 'Display name',
       phone: 'Phone number',
       homeBase: 'Home base',
       truckTypes: 'Truck types',
       languages: 'Languages',
-      paymentMethod: 'Payment method',
       preferredLanguage: 'App language',
       newLoads: 'Notify me about new loads',
-      payouts: 'Notify me about payouts',
       ratings: 'Notify me about new ratings',
       autoAccept: 'Allow smart load suggestions',
       shareLocation: 'Share my live location',
@@ -1011,7 +814,6 @@ function SettingsSection({
     label: string;
   }> = [
       { key: 'newLoads', label: text.newLoads },
-      { key: 'payouts', label: text.payouts },
       { key: 'ratings', label: text.ratings },
     ];
   const preferenceOptions: Array<{
@@ -1120,24 +922,6 @@ function SettingsSection({
               </label>
 
               <label className="block">
-                <span className="mb-2 block text-sm text-[#4B2E2B]/65">{text.paymentMethod}</span>
-                <select
-                  value={settings.paymentMethod}
-                  onChange={(event) =>
-                    onSettingsChange({
-                      ...settings,
-                      paymentMethod: event.target.value as DriverSettings['paymentMethod'],
-                    })
-                  }
-                  className="w-full rounded-xl border border-[#4B2E2B]/10 bg-[#F7EFE9] px-4 py-3 text-[#4B2E2B] outline-none focus:border-[#D4A373]"
-                >
-                  <option value="M-Pesa">M-Pesa</option>
-                  <option value="Airtel Money">Airtel Money</option>
-                  <option value="Bank">Bank</option>
-                </select>
-              </label>
-
-              <label className="block">
                 <span className="mb-2 block text-sm text-[#4B2E2B]/65">{text.preferredLanguage}</span>
                 <select
                   value={settings.preferredLanguage}
@@ -1180,25 +964,6 @@ function SettingsSection({
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-2xl bg-white p-6 shadow-md">
-            <div className="mb-5 text-lg text-[#4B2E2B]">{text.payout}</div>
-
-            <div className="space-y-4">
-              <div className="rounded-xl bg-[#F7EFE9] p-4">
-                <div className="text-xs text-[#4B2E2B]/55">Email</div>
-                <div className="mt-1 text-sm text-[#4B2E2B]">{user?.email || '-'}</div>
-              </div>
-              <div className="rounded-xl bg-[#F7EFE9] p-4">
-                <div className="text-xs text-[#4B2E2B]/55">Method</div>
-                <div className="mt-1 text-sm text-[#4B2E2B]">{settings.paymentMethod}</div>
-              </div>
-              <div className="rounded-xl bg-[#F7EFE9] p-4">
-                <div className="text-xs text-[#4B2E2B]/55">Profile</div>
-                <div className="mt-1 text-sm text-[#4B2E2B]">{settings.displayName || user?.name || '-'}</div>
-              </div>
-            </div>
-          </div>
-
           <div className="rounded-2xl bg-white p-6 shadow-md">
             <div className="space-y-4">
               {preferenceOptions.map((item) => (
@@ -1249,7 +1014,6 @@ export function DriverWorkspace({
   onUploadDocument,
   onSettingsChange,
   onSaveSettings,
-  onWithdraw,
 }: DriverWorkspaceProps) {
   switch (section) {
     case 'trips':
@@ -1261,8 +1025,6 @@ export function DriverWorkspace({
           onAdvanceTrip={onAdvanceTrip}
         />
       );
-    case 'earnings':
-      return <EarningsSection language={language} loads={driverLoads} onWithdraw={onWithdraw} />;
     case 'documents':
       return <DocumentsSection language={language} documents={documents} onUploadDocument={onUploadDocument} />;
     case 'ratings':

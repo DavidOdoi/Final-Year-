@@ -9,13 +9,13 @@ import {
   type DriverSettings,
 } from '../components/dashboard/DriverWorkspace';
 import { apiRequest, clearStoredSession, getAuthToken, getStoredUser, setStoredSession, type AuthUser, type Load } from '../lib/api';
-import { getLoadValue, getNextLoadStatus } from '../lib/logistics';
+import { getNextLoadStatus } from '../lib/logistics';
 
 const DRIVER_LOCAL_LOADS_KEY = 'driver_dashboard_local_loads_v1';
 const DRIVER_DOCUMENTS_KEY = 'driver_dashboard_documents_v1';
 const DRIVER_SETTINGS_KEY = 'driver_dashboard_settings_v1';
 const DEFAULT_SECTION: DriverSection = 'loads';
-const DRIVER_SECTIONS: DriverSection[] = ['loads', 'trips', 'earnings', 'documents', 'ratings', 'settings'];
+const DRIVER_SECTIONS: DriverSection[] = ['loads', 'trips', 'documents', 'ratings', 'settings'];
 
 function readLocalValue<T>(key: string, fallback: T) {
   if (typeof window === 'undefined') {
@@ -95,13 +95,11 @@ function createDefaultSettings(user: AuthUser | null): DriverSettings {
     homeBase: user?.location || '',
     truckTypes: 'Flatbed, Box Truck',
     languages: 'English, Swahili',
-    paymentMethod: 'M-Pesa',
     preferredLanguage: 'en',
     autoAccept: false,
     shareLocation: true,
     notifications: {
       newLoads: true,
-      payouts: true,
       ratings: true,
     },
   };
@@ -160,7 +158,6 @@ function getSectionLabel(section: DriverSection, language: 'sw' | 'en') {
     sw: {
       loads: 'Mizigo Inayopatikana',
       trips: 'Safari Zangu',
-      earnings: 'Mapato',
       documents: 'Nyaraka',
       ratings: 'Ukaguzi',
       settings: 'Mipangilio',
@@ -168,7 +165,6 @@ function getSectionLabel(section: DriverSection, language: 'sw' | 'en') {
     en: {
       loads: 'Available Loads',
       trips: 'My Trips',
-      earnings: 'Earnings',
       documents: 'Documents',
       ratings: 'Ratings',
       settings: 'Settings',
@@ -213,9 +209,6 @@ export default function DriverDashboard() {
     driverLoads.map((load) => load._id).filter((loadId): loadId is string => Boolean(loadId)),
   );
   const availableLoads = remoteAvailableLoads.filter((load) => !load._id || !driverLoadIds.has(load._id));
-  const walletBalance = driverLoads
-    .filter((load) => load.status === 'delivered')
-    .reduce((sum, load) => sum + getLoadValue(load), 0);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -542,18 +535,6 @@ export default function DriverDashboard() {
     })();
   }
 
-  function handleWithdraw() {
-    setFeedback(
-      walletBalance > 0
-        ? language === 'sw'
-          ? `Ombi la malipo limetayarishwa kupitia ${settings.paymentMethod}.`
-          : `A payout request has been prepared via ${settings.paymentMethod}.`
-        : language === 'sw'
-          ? 'Hakuna salio la kutoa kwa sasa.'
-          : 'There is no available balance to withdraw yet.',
-    );
-  }
-
   return (
     <div className="relative min-h-screen bg-[#F7EFE9]">
       <Sidebar
@@ -571,7 +552,6 @@ export default function DriverDashboard() {
           setLanguage={handleLanguageChange}
           onMenuClick={() => setIsSidebarOpen(true)}
           driverName={settings.displayName || user?.name}
-          walletBalance={walletBalance}
           currentSectionLabel={getSectionLabel(activeSection, language)}
         />
 
@@ -603,7 +583,6 @@ export default function DriverDashboard() {
             onUploadDocument={handleUploadDocument}
             onSettingsChange={setSettings}
             onSaveSettings={handleSaveSettings}
-            onWithdraw={handleWithdraw}
           />
         </main>
       </div>
