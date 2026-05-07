@@ -1,7 +1,7 @@
 import { motion } from 'motion/react';
-import { BarChart3, MapPin, Package, TrendingUp } from 'lucide-react';
+import { Activity, MapPin, Package, TrendingUp } from 'lucide-react';
 import type { Load } from '../../lib/api';
-import { formatCurrency, getLoadRoute, getMonthlySpendSeries } from '../../lib/logistics';
+import { getLoadRoute, getMonthlySpendSeries } from '../../lib/logistics';
 
 interface SpendAnalyticsProps {
   language: 'sw' | 'en';
@@ -12,31 +12,31 @@ interface SpendAnalyticsProps {
 export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnalyticsProps) {
   const content = {
     sw: {
-      title: 'Uchambuzi wa Matumizi',
-      subtitle: 'Muhtasari wa miezi sita ya gharama za usafirishaji.',
-      loading: 'Inapakia uchambuzi wa matumizi...',
-      empty: 'Tuma mzigo wako wa kwanza ili kuona mwenendo wa matumizi hapa.',
-      thisMonth: 'Mwezi huu',
-      shipments: 'Mizigo',
+      title: 'Shughuli za Njia',
+      subtitle: 'Muhtasari wa safari na njia maarufu za miezi sita.',
+      loading: 'Inapakia shughuli za njia...',
+      empty: 'Chapisha mzigo wako wa kwanza ili kuona mwenendo wa safari hapa.',
+      thisMonth: 'Safari Mwezi Huu',
+      shipments: 'Jumla ya Safari',
       trend: 'Mabadiliko',
       busiestLane: 'Njia yenye shughuli zaidi',
-      up: 'juu ya mwezi uliopita',
+      up: 'zaidi ya mwezi uliopita',
       down: 'chini ya mwezi uliopita',
       steady: 'Hakuna mabadiliko kutoka mwezi uliopita',
       noLane: 'Hakuna njia bado',
     },
     en: {
-      title: 'Spend Analytics',
-      subtitle: 'Six-month snapshot of your freight spending.',
-      loading: 'Loading spend analytics...',
-      empty: 'Post your first load to start seeing spend trends here.',
-      thisMonth: 'This month',
-      shipments: 'Shipments',
+      title: 'Route Activity',
+      subtitle: 'Six-month overview of your shipment frequency and top routes.',
+      loading: 'Loading route activity...',
+      empty: 'Post your first load to start seeing shipment trends here.',
+      thisMonth: 'Trips This Month',
+      shipments: 'Total Trips',
       trend: 'Change',
-      busiestLane: 'Busiest lane',
-      up: 'above last month',
-      down: 'below last month',
-      steady: 'No change from last month',
+      busiestLane: 'Busiest route',
+      up: 'more than last month',
+      down: 'fewer than last month',
+      steady: 'Same as last month',
       noLane: 'No routes yet',
     },
   };
@@ -54,12 +54,12 @@ export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnal
   const series = getMonthlySpendSeries(loads, language);
   const currentMonth = series[series.length - 1] || { month: '-', spend: 0, shipments: 0 };
   const previousMonth = series[series.length - 2] || { month: '-', spend: 0, shipments: 0 };
-  const peakSpend = series.reduce((highest, item) => Math.max(highest, item.spend), 0);
+  const peakShipments = series.reduce((highest, item) => Math.max(highest, item.shipments), 0);
 
   const trendDelta =
-    previousMonth.spend > 0
-      ? Math.round(((currentMonth.spend - previousMonth.spend) / previousMonth.spend) * 100)
-      : currentMonth.spend > 0
+    previousMonth.shipments > 0
+      ? Math.round(((currentMonth.shipments - previousMonth.shipments) / previousMonth.shipments) * 100)
+      : currentMonth.shipments > 0
         ? 100
         : 0;
 
@@ -70,27 +70,18 @@ export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnal
         ? `${Math.abs(trendDelta)}% ${text.down}`
         : text.steady;
 
-  const laneMap = new Map<string, { route: string; shipments: number; spend: number }>();
+  const laneMap = new Map<string, { route: string; shipments: number }>();
 
   loads.forEach((load) => {
     const route = getLoadRoute(load, language);
-    const label = `${route.from} -> ${route.to}`;
-    const current = laneMap.get(label) || { route: label, shipments: 0, spend: 0 };
-
+    const label = `${route.from} → ${route.to}`;
+    const current = laneMap.get(label) || { route: label, shipments: 0 };
     current.shipments += 1;
-    current.spend += load.price || load.budget || 0;
-
     laneMap.set(label, current);
   });
 
   const busiestLane =
-    [...laneMap.values()].sort((left, right) => {
-      if (right.shipments !== left.shipments) {
-        return right.shipments - left.shipments;
-      }
-
-      return right.spend - left.spend;
-    })[0] || null;
+    [...laneMap.values()].sort((a, b) => b.shipments - a.shipments)[0] || null;
 
   return (
     <motion.div
@@ -105,7 +96,7 @@ export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnal
           <p className="mt-1 text-sm text-[#4B2E2B]/60">{text.subtitle}</p>
         </div>
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] shadow-lg">
-          <BarChart3 className="h-6 w-6 text-white" />
+          <Activity className="h-6 w-6 text-white" />
         </div>
       </div>
 
@@ -118,26 +109,23 @@ export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnal
           <div className="mt-6 grid grid-cols-2 gap-3">
             <div className="rounded-xl bg-[#F7EFE9] p-4">
               <div className="text-xs text-[#4B2E2B]/60">{text.thisMonth}</div>
-              <div className="mt-1 text-lg text-[#4B2E2B]">
-                {formatCurrency(currentMonth.spend, language, true)}
-              </div>
+              <div className="mt-1 text-lg text-[#4B2E2B]">{currentMonth.shipments}</div>
             </div>
             <div className="rounded-xl bg-[#F7EFE9] p-4">
               <div className="text-xs text-[#4B2E2B]/60">{text.shipments}</div>
-              <div className="mt-1 text-lg text-[#4B2E2B]">{currentMonth.shipments}</div>
+              <div className="mt-1 text-lg text-[#4B2E2B]">{loads.length}</div>
             </div>
           </div>
 
+          {/* Shipment frequency bar chart */}
           <div className="mt-6">
             <div className="mb-3 flex items-center justify-between text-xs text-[#4B2E2B]/60">
               <span>{text.title}</span>
               <span>{currentMonth.month}</span>
             </div>
-
             <div className="flex h-36 items-end gap-3">
               {series.map((item, index) => {
-                const height = peakSpend > 0 ? Math.max(12, (item.spend / peakSpend) * 100) : 10;
-
+                const height = peakShipments > 0 ? Math.max(12, (item.shipments / peakShipments) * 100) : 10;
                 return (
                   <div key={`${item.month}-${index}`} className="flex flex-1 flex-col items-center gap-2">
                     <div className="flex h-full w-full items-end">
@@ -146,7 +134,7 @@ export function SpendAnalytics({ language, loads, isLoading = false }: SpendAnal
                         animate={{ height: `${height}%` }}
                         transition={{ delay: index * 0.08 + 0.1, duration: 0.5 }}
                         className="w-full rounded-t-xl bg-gradient-to-t from-[#4B2E2B] to-[#D4A373]"
-                        title={`${item.month}: ${formatCurrency(item.spend, language)}`}
+                        title={`${item.month}: ${item.shipments} trips`}
                       />
                     </div>
                     <div className="text-[11px] text-[#4B2E2B]/60">{item.month}</div>

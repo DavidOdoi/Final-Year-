@@ -1,14 +1,12 @@
 import { motion } from 'motion/react';
-import { Bell, Wallet, Globe, Menu, Building2 } from 'lucide-react';
+import { Bell, Globe, Menu, Building2 } from 'lucide-react';
 import { ImageWithFallback } from '../figma/ImageWithFallback';
-import { formatCurrency } from '../../lib/logistics';
 
 interface TraderTopBarProps {
   language: 'sw' | 'en';
   setLanguage: (value: 'sw' | 'en') => void;
   onMenuClick: () => void;
   companyName?: string;
-  walletBalance?: number;
 }
 
 export function TraderTopBar({
@@ -16,19 +14,10 @@ export function TraderTopBar({
   setLanguage,
   onMenuClick,
   companyName,
-  walletBalance = 0,
 }: TraderTopBarProps) {
   const content = {
-    sw: {
-      greeting: 'Karibu tena',
-      company: 'Kilimanjaro Exports Ltd',
-      wallet: 'Pochi',
-    },
-    en: {
-      greeting: 'Welcome back',
-      company: 'Kilimanjaro Exports Ltd',
-      wallet: 'Wallet',
-    },
+    sw: { company: 'Kilimanjaro Exports Ltd' },
+    en: { company: 'Kilimanjaro Exports Ltd' },
   };
 
   const text = content[language];
@@ -44,6 +33,7 @@ export function TraderTopBar({
     <header className="relative bg-white border-b border-[#4B2E2B]/10 sticky top-0 z-30 shadow-sm">
       <div className="px-4 md:px-8 py-4">
         <div className="flex items-center justify-between">
+
           {/* Left: Company Info */}
           <div className="flex items-center gap-4">
             <motion.button
@@ -70,17 +60,6 @@ export function TraderTopBar({
 
           {/* Right: Controls */}
           <div className="flex items-center gap-3 md:gap-4">
-            {/* Wallet Balance */}
-            <motion.div
-              whileHover={{ scale: 1.02, y: -2 }}
-              className="flex items-center gap-2 bg-gradient-to-br from-[#D4A373] to-[#4B2E2B] text-white px-3 md:px-5 py-2 rounded-full shadow-lg"
-            >
-              <Wallet className="w-4 h-4" />
-              <div className="flex flex-col">
-                <span className="text-[10px] opacity-80 hidden md:block">{text.wallet}</span>
-                <span className="text-xs md:text-sm font-medium">{formatCurrency(walletBalance, language)}</span>
-              </div>
-            </motion.div>
 
             {/* Language Toggle */}
             <motion.button
@@ -111,7 +90,6 @@ export function TraderTopBar({
               <ImageWithFallback
                 src="yes.png"
                 alt="Profile"
-
                 className="w-full h-full object-cover"
               />
             </motion.button>
@@ -121,5 +99,3 @@ export function TraderTopBar({
     </header>
   );
 }
-
-

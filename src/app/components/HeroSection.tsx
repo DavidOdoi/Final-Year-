@@ -53,16 +53,16 @@ export function HeroSection({ language }: HeroSectionProps) {
   const content = {
     sw: {
       badge: 'Waaminifu Uganda & Afrika Mashariki',
-      headline: 'Safirisha Mizigo Kwa Urahisi',
-      subheadline: 'Unganisha na madereva wa mizigo kwa haraka na usalama katika Afrika Mashariki',
+      headline: 'Nguvu ya Usafirishaji Bora kwa Matokeo Mazuri',
+      subheadline: 'Safirisha mizigo kwa akili. Unganishwa na madereva waliohakikiwa Uganda kwa dakika chache — wa kuaminika, wa haraka, na kwa wakati.',
       shipperCTA: 'Shipper Register',
       driverCTA: 'Driver Register',
       scroll: 'Telezesha chini',
     },
     en: {
       badge: 'Trusted across Uganda & East Africa',
-      headline: 'Transport Goods Easily',
-      subheadline: 'Connect with freight drivers quickly and safely across Uganda',
+      headline: 'Powering intelligent logistics to drive better outcomes',
+      subheadline: 'Move freight smarter. Connect with verified drivers across Uganda in minutes — reliable, fast, and always on time.',
       shipperCTA: 'Shipper Register',
       driverCTA: 'Driver Register',
       scroll: 'Scroll to explore',

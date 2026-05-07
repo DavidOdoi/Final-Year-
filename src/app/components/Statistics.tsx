@@ -1,355 +1,467 @@
-import { motion, useMotionValue, useTransform, animate } from 'motion/react';
-import { useInView } from 'motion/react';
-import { useRef, useEffect, useState } from 'react';
-import { TrendingUp, Users, Package, Award, Globe, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useEffect, useState } from 'react';
+import {
+  Users, Star, Clock, Shield,
+} from 'lucide-react';
 
 interface StatisticsProps {
   language: 'sw' | 'en';
 }
 
-function Counter({ end, duration = 2, suffix = '' }: { end: number; duration?: number; suffix?: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
+type LucideIcon = typeof Users;
 
-  useEffect(() => {
-    if (!isInView) return;
-
-    let startTime: number | null = null;
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const progress = Math.min((currentTime - startTime) / (duration * 1000), 1);
-
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      setCount(Math.floor(easeOutQuart * end));
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      } else {
-        setCount(end);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [isInView, end, duration]);
-
-  return (
-    <span ref={ref}>
-      {count.toLocaleString()}
-      {suffix}
-    </span>
-  );
+interface TrustItem {
+  value: string;
+  label: string;
+  icon: LucideIcon;
 }
 
-export function Statistics({ language }: StatisticsProps) {
-  const content = {
-    sw: {
-      title: 'Athari Yetu',
-      subtitle: 'Kubadilisha usafirishaji wa mizigo katika Afrika Mashariki',
-      badge: 'Takwimu za Moja kwa Moja',
-      stats: [
-        {
-          value: 10000,
-          suffix: '+',
-          label: 'Madereva Waliojisajili',
-          subtext: 'Madereva wa kuaminika',
-          icon: Users,
-          color: 'from-blue-500 to-cyan-500',
-        },
-        {
-          value: 50000,
-          suffix: '+',
-          label: 'Mizigo Iliyosafirisha',
-          subtext: 'Safari zilizokamilika',
-          icon: Package,
-          color: 'from-purple-500 to-pink-500',
-        },
-        {
-          value: 8,
-          suffix: '',
-          label: 'Nchi za Afrika Mashariki',
-          subtext: 'Mtandao wa kikanda',
-          icon: Globe,
-          color: 'from-orange-500 to-red-500',
-        },
-        {
-          value: 98,
-          suffix: '%',
-          label: 'Kuridhika kwa Wateja',
-          subtext: 'Ukaguzi wa wastani',
-          icon: Award,
-          color: 'from-green-500 to-emerald-500',
-        },
-      ],
-      additionalStats: [
-        {
-          value: '4.8',
-          label: 'Ukaguzi wa Wastani',
-          icon: Award,
-        },
-        {
-          value: '24/7',
-          label: 'Msaada wa Wateja',
-          icon: Zap,
-        },
-        {
-          value: '2hrs',
-          label: 'Muda wa Wastani wa Ulinganishaji',
-          icon: TrendingUp,
-        },
-      ],
-    },
-    en: {
-      title: 'Our Impact',
-      subtitle: 'Transforming freight logistics across Uganda',
-      badge: 'Live Statistics',
-      stats: [
-        {
-          value: 10000,
-          suffix: '+',
-          label: 'Registered Drivers',
-          subtext: 'Verified professionals',
-          icon: Users,
-          color: 'from-blue-500 to-cyan-500',
-        },
-        {
-          value: 50000,
-          suffix: '+',
-          label: 'Loads Delivered',
-          subtext: 'Successful trips',
-          icon: Package,
-          color: 'from-purple-500 to-pink-500',
-        },
-        {
-          value: 30,
-          suffix: '+',
-          label: 'Uganda Routes',
-          subtext: 'Regional network',
-          icon: Globe,
-          color: 'from-orange-500 to-red-500',
-        },
-        {
-          value: 98,
-          suffix: '%',
-          label: 'Customer Satisfaction',
-          subtext: 'Average rating',
-          icon: Award,
-          color: 'from-green-500 to-emerald-500',
-        },
-      ],
-      additionalStats: [
-        {
-          value: '4.8',
-          label: 'Average Rating',
-          icon: Award,
-        },
-        {
-          value: '24/7',
-          label: 'Customer Support',
-          icon: Zap,
-        },
-        {
-          value: '2hrs',
-          label: 'Average Match Time',
-          icon: TrendingUp,
-        },
-      ],
-    },
-  };
+const BG = '#050505';
 
-  const text = content[language];
+const TICKER_ITEMS = [
+  { icon: '🚛', text: 'Kampala → Jinja' },
+  { icon: '📦', text: 'Entebbe → Gulu' },
+  { icon: '🚚', text: 'Mbarara → Kampala' },
+  { icon: '🛣️', text: 'Kampala → Fort Portal' },
+  { icon: '📍', text: 'Jinja → Mbale' },
+  { icon: '🚛', text: 'Kampala → Arua' },
+  { icon: '📦', text: 'Masaka → Kampala' },
+  { icon: '🚚', text: 'Soroti → Kampala' },
+  { icon: '🛣️', text: 'Lira → Kampala' },
+  { icon: '📍', text: 'Kampala → Kabale' },
+  { icon: '🚛', text: 'Kampala → Kasese' },
+  { icon: '📦', text: 'Tororo → Kampala' },
+];
 
+interface LogoItem {
+  name: string;
+  short: string;
+  color: string;
+  bg: string;
+}
+
+const LOGOS_ROW_A: LogoItem[] = [
+  { name: 'DHL Express',      short: 'DHL',  color: '#ffffff', bg: '#d40511' },
+  { name: 'Bolloré Logistics',short: 'BL',   color: '#ffffff', bg: '#003087' },
+  { name: 'Spedag Interfreight', short: 'SIF', color: '#ffffff', bg: '#1a5276' },
+  { name: 'Siginon Logistics',short: 'SIG',  color: '#ffffff', bg: '#1e8449' },
+  { name: 'DB Schenker',      short: 'DBS',  color: '#ffffff', bg: '#cc0000' },
+  { name: 'Agility Logistics',short: 'AGI',  color: '#ffffff', bg: '#0057a8' },
+];
+
+const LOGOS_ROW_B: LogoItem[] = [
+  { name: 'Mitchell Cotts',   short: 'MCF',  color: '#ffffff', bg: '#6d4c41' },
+  { name: 'Crown Beverages',  short: 'CBC',  color: '#ffffff', bg: '#e65100' },
+  { name: 'Total Energies',   short: 'TE',   color: '#ffffff', bg: '#c0392b' },
+  { name: 'Vivo Energy',      short: 'VE',   color: '#ffffff', bg: '#27ae60' },
+  { name: 'UFFAA',            short: 'UFF',  color: '#ffffff', bg: '#6c3483' },
+  { name: 'Exim Logistics',   short: 'EXL',  color: '#ffffff', bg: '#1a6ba0' },
+];
+
+function LogoChip({ item }: { item: LogoItem }) {
   return (
-    <div className="py-20 md:py-32 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
-      {/* Animated Background */}
-      <div className="absolute inset-0">
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage: `
-                linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
-              `,
-              backgroundSize: '60px 60px'
-            }}
-          />
-        </div>
-
-        {/* Animated Orbs */}
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.15, 0.25, 0.15],
-            x: [0, 50, 0],
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.2, 0.3, 0.2],
-            x: [0, -50, 0],
-          }}
-          transition={{ duration: 12, repeat: Infinity }}
-          className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-green-500 to-cyan-500 rounded-full blur-3xl"
-        />
+    <div
+      className="flex-shrink-0 flex items-center gap-3 px-5 py-3 rounded-2xl mx-3 cursor-default select-none"
+      style={{
+        border: '1px solid rgba(255,255,255,0.1)',
+        background: 'rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(8px)',
+        minWidth: '180px',
+      }}
+    >
+      {/* Brand colour badge */}
+      <div
+        className="flex-shrink-0 flex items-center justify-center rounded-lg font-black"
+        style={{
+          width: '38px', height: '38px',
+          background: item.bg,
+          color: item.color,
+          fontSize: '0.58rem',
+          letterSpacing: '0.06em',
+        }}
+      >
+        {item.short}
       </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16"
-        >
-          <motion.div
-            initial={{ scale: 0, rotate: -180 }}
-            whileInView={{ scale: 1, rotate: 0 }}
-            viewport={{ once: true }}
-            transition={{ type: "spring", bounce: 0.5 }}
-            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-2 rounded-full mb-6"
-          >
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-white/90 text-sm uppercase tracking-wide">{text.badge}</span>
-          </motion.div>
-
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-4xl md:text-6xl mb-4 text-white"
-          >
-            {text.title}
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-xl md:text-2xl text-white/80 max-w-3xl mx-auto"
-          >
-            {text.subtitle}
-          </motion.p>
-        </motion.div>
-
-        {/* Main Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 mb-12 max-w-7xl mx-auto">
-          {text.stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50, scale: 0.8 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{
-                  delay: index * 0.1,
-                  type: "spring",
-                  stiffness: 100,
-                }}
-                whileHover={{
-                  scale: 1.05,
-                  y: -10,
-                }}
-                className="group relative"
-              >
-                {/* Card */}
-                <div className="relative bg-white/10 backdrop-blur-md rounded-3xl p-6 md:p-8 border border-white/20 hover:border-white/40 transition-all overflow-hidden">
-                  {/* Gradient Background on Hover */}
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    whileHover={{ opacity: 0.1 }}
-                    className={`absolute inset-0 bg-gradient-to-br ${stat.color}`}
-                  />
-
-                  {/* Icon */}
-                  <motion.div
-                    animate={{
-                      rotate: [0, 5, 0, -5, 0],
-                    }}
-                    transition={{ duration: 5, repeat: Infinity, delay: index * 0.2 }}
-                    className="relative z-10 mb-4"
-                  >
-                    <div className={`inline-flex w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br ${stat.color} rounded-2xl items-center justify-center shadow-lg`}>
-                      <Icon className="w-7 h-7 md:w-8 md:h-8 text-white" />
-                    </div>
-                  </motion.div>
-
-                  {/* Number */}
-                  <div className="relative z-10 mb-2">
-                    <div className="text-4xl md:text-5xl lg:text-6xl text-white mb-1">
-                      <Counter end={stat.value} suffix={stat.suffix} duration={2.5} />
-                    </div>
-                    <div className="text-white/60 text-xs md:text-sm mb-2">{stat.subtext}</div>
-                    <div className="text-white/90 text-sm md:text-base">{stat.label}</div>
-                  </div>
-
-                  {/* Decorative Corner */}
-                  <div className={`absolute -bottom-6 -right-6 w-24 h-24 bg-gradient-to-br ${stat.color} rounded-full opacity-20 group-hover:opacity-30 blur-2xl transition-opacity`} />
-                </div>
-
-                {/* Floating Particle Effect */}
-                <motion.div
-                  animate={{
-                    y: [0, -20, 0],
-                    opacity: [0, 1, 0],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: index * 0.5,
-                  }}
-                  className={`absolute -top-2 right-8 w-3 h-3 bg-gradient-to-br ${stat.color} rounded-full`}
-                />
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* Additional Stats Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
-        >
-          <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 md:p-8">
-            <div className="grid grid-cols-3 gap-6 md:gap-12">
-              {text.additionalStats.map((stat, index) => {
-                const Icon = stat.icon;
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.5 + index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    className="text-center"
-                  >
-                    <motion.div
-                      animate={{ rotate: [0, 10, -10, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, delay: index * 0.3 }}
-                      className="inline-block mb-3"
-                    >
-                      <Icon className="w-8 h-8 text-orange-400" />
-                    </motion.div>
-                    <div className="text-2xl md:text-3xl text-white mb-1">{stat.value}</div>
-                    <div className="text-white/70 text-xs md:text-sm">{stat.label}</div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          </div>
-        </motion.div>
-      </div>
+      <span className="font-semibold text-white" style={{ fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+        {item.name}
+      </span>
     </div>
   );
 }
 
+export function Statistics({ language }: StatisticsProps) {
+  const [activeLive, setActiveLive] = useState(0);
 
+  const activities = {
+    sw: [
+      '🟢 Dereva mpya alisajiliwa — Kampala, Uganda',
+      '📦 Mizigo 8T ilifanikiwa — Kampala → Jinja',
+      '⭐ Ukaguzi 5/5 ulipewa — Mbarara, Uganda',
+      '🚛 Safari ilikamilika — Entebbe → Gulu',
+      '📍 Mzigo mkubwa uliowekwa — Jinja, Uganda',
+      '🟢 Kampuni mpya ilisajiliwa — Kampala, Uganda',
+    ],
+    en: [
+      '🟢 New driver verified — Kampala, Uganda',
+      '📦 8T shipment matched — Kampala → Jinja',
+      '⭐ 5-star rating received — Mbarara, Uganda',
+      '🚛 Trip completed — Entebbe → Gulu',
+      '📍 Bulk cargo listed — Jinja, Uganda',
+      '🟢 New company onboarded — Kampala, Uganda',
+    ],
+  };
 
+  const content = {
+    sw: {
+      badge: 'NGUVU YA USAFIRISHAJI UGANDA',
+      headlineBase: 'Usafirishaji Bora,',
+      headlineGradient: 'Matokeo Mazuri',
+      subtitle:
+        'Safirisha mizigo kwa akili zaidi. Unganishwa na madereva waliohakikiwa Uganda kwa dakika chache — wa kuaminika, wa haraka, na kwa wakati.',
+      companiesLabel: 'Imewaamini Makampuni Makubwa Uganda',
+      trustItems: [
+        { value: '4.8★', label: 'Ukaguzi wa Wastani', icon: Star },
+        { value: '24/7', label: 'Msaada wa Wateja', icon: Shield },
+        { value: '<2hrs', label: 'Muda wa Ulinganishaji', icon: Clock },
+      ] as TrustItem[],
+    },
+    en: {
+      badge: "UGANDA'S #1 FREIGHT PLATFORM",
+      headlineBase: 'Smarter Freight,',
+      headlineGradient: 'Better Outcomes',
+      subtitle:
+        'Move freight smarter. Connect with verified drivers across Uganda in minutes — reliable, transparent, and always on time.',
+      companiesLabel: 'Trusted by Uganda\'s Leading Logistics Companies',
+      trustItems: [
+        { value: '4.8★', label: 'Average Rating', icon: Star },
+        { value: '24/7', label: 'Customer Support', icon: Shield },
+        { value: '<2hrs', label: 'Match Time', icon: Clock },
+      ] as TrustItem[],
+    },
+  };
+
+  const t = content[language];
+  const liveActivities = activities[language];
+
+  useEffect(() => {
+    const timer = setInterval(
+      () => setActiveLive((p) => (p + 1) % liveActivities.length),
+      3500
+    );
+    return () => clearInterval(timer);
+  }, [liveActivities.length]);
+
+  return (
+    <section className="relative overflow-hidden" style={{ background: BG }}>
+
+      {/* ── Background ───────────────────────────────────────────── */}
+      <div className="absolute inset-0 pointer-events-none">
+        <svg className="absolute inset-0 w-full h-full" style={{ opacity: 0.07 }}>
+          <defs>
+            <pattern id="roadGrid" width="100" height="100" patternUnits="userSpaceOnUse">
+              <path d="M0 50 L100 50" stroke="white" strokeWidth="1" strokeDasharray="6 4" />
+              <path d="M50 0 L50 100" stroke="white" strokeWidth="1" strokeDasharray="6 4" />
+              <circle cx="50" cy="50" r="1.5" fill="white" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#roadGrid)" />
+        </svg>
+
+        <div
+          className="absolute inset-0 flex items-center justify-center select-none"
+          style={{ opacity: 0.022, pointerEvents: 'none' }}
+        >
+          <span
+            className="font-black text-white uppercase whitespace-nowrap"
+            style={{ fontSize: 'clamp(80px, 18vw, 240px)', letterSpacing: '0.15em' }}
+          >
+            UGANDA
+          </span>
+        </div>
+
+        <motion.div
+          animate={{ scale: [1, 1.3, 1], opacity: [0.15, 0.25, 0.15], x: [0, 60, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-0 left-1/3 w-[700px] h-[700px] rounded-full"
+          style={{ background: 'radial-gradient(circle, #f9731650 0%, transparent 65%)', filter: 'blur(80px)' }}
+        />
+        <motion.div
+          animate={{ scale: [1, 1.25, 1], opacity: [0.12, 0.22, 0.12], x: [0, -50, 0] }}
+          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 4 }}
+          className="absolute bottom-0 right-1/4 w-[600px] h-[600px] rounded-full"
+          style={{ background: 'radial-gradient(circle, #10b98150 0%, transparent 65%)', filter: 'blur(80px)' }}
+        />
+        <motion.div
+          animate={{ scale: [1, 1.4, 1], opacity: [0.1, 0.18, 0.1] }}
+          transition={{ duration: 22, repeat: Infinity, ease: 'easeInOut', delay: 8 }}
+          className="absolute top-1/2 right-0 w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, #3b82f650 0%, transparent 65%)', filter: 'blur(80px)' }}
+        />
+      </div>
+
+      {/* ── Journey Ticker ───────────────────────────────────────── */}
+      <div
+        className="relative z-10 overflow-hidden"
+        style={{
+          borderBottom: '1px solid rgba(255,255,255,0.12)',
+          background: 'rgba(255,255,255,0.03)',
+          paddingTop: '1rem',
+          paddingBottom: '1rem',
+        }}
+      >
+        <div
+          className="absolute left-0 inset-y-0 w-24 z-10 pointer-events-none"
+          style={{ background: `linear-gradient(to right, ${BG}, transparent)` }}
+        />
+        <div
+          className="absolute right-0 inset-y-0 w-24 z-10 pointer-events-none"
+          style={{ background: `linear-gradient(to left, ${BG}, transparent)` }}
+        />
+        <motion.div
+          animate={{ x: ['0%', '-50%'] }}
+          transition={{ duration: 45, repeat: Infinity, ease: 'linear' }}
+          className="flex whitespace-nowrap"
+        >
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+            <div key={i} className="inline-flex items-center gap-3" style={{ marginLeft: '2rem', marginRight: '2rem' }}>
+              <span style={{ fontSize: '1.25rem' }}>{item.icon}</span>
+              <span
+                className="font-bold tracking-wide"
+                style={{ color: 'rgba(255,255,255,0.9)', fontSize: '1rem' }}
+              >
+                {item.text}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,0.18)', marginLeft: '1.5rem', marginRight: '0.5rem' }}>
+                ●
+              </span>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+
+      {/* ── Main Content ─────────────────────────────────────────── */}
+      <div className="relative z-10 py-20 md:py-32">
+        <div className="container mx-auto px-4" style={{ maxWidth: '1280px' }}>
+
+          {/* Header */}
+          <div className="text-center mb-16 md:mb-24">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full"
+              style={{
+                border: '1px solid rgba(249,115,22,0.4)',
+                background: 'rgba(249,115,22,0.1)',
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <motion.div
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                className="w-2 h-2 rounded-full"
+                style={{ background: '#f97316' }}
+              />
+              <span className="font-bold uppercase tracking-widest" style={{ color: '#fdba74', fontSize: '0.65rem' }}>
+                {t.badge}
+              </span>
+            </motion.div>
+
+            <motion.h2
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="font-black text-white leading-none tracking-tight mb-5"
+              style={{ fontSize: 'clamp(2.8rem, 8vw, 6rem)' }}
+            >
+              {t.headlineBase}{' '}
+              <span className="relative inline-block">
+                <span
+                  className="relative z-10"
+                  style={{
+                    backgroundImage: 'linear-gradient(135deg, #fb923c 0%, #fbbf24 50%, #f97316 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  {t.headlineGradient}
+                </span>
+                <motion.span
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.6, duration: 0.8, ease: 'easeOut' }}
+                  className="absolute bottom-0.5 left-0 right-0 rounded-full origin-left"
+                  style={{ height: '3px', background: 'linear-gradient(90deg, #f97316, #fbbf24)' }}
+                />
+              </span>
+            </motion.h2>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="max-w-2xl mx-auto"
+              style={{ color: 'rgba(255,255,255,0.75)', fontSize: '1.1rem', lineHeight: '1.75' }}
+            >
+              {t.subtitle}
+            </motion.p>
+          </div>
+
+          {/* ── Logo Wall ────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mb-16"
+          >
+            {/* Section label */}
+            <div className="text-center mb-8">
+              <p
+                className="font-semibold uppercase tracking-widest"
+                style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem' }}
+              >
+                {t.companiesLabel}
+              </p>
+              <div className="flex items-center justify-center gap-3 mt-3">
+                <div style={{ height: '1px', width: '60px', background: 'rgba(255,255,255,0.1)' }} />
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#f97316', opacity: 0.6 }} />
+                <div style={{ height: '1px', width: '60px', background: 'rgba(255,255,255,0.1)' }} />
+              </div>
+            </div>
+
+            {/* Row A — scrolling left */}
+            <div className="relative overflow-hidden mb-3">
+              <div
+                className="absolute left-0 inset-y-0 w-24 z-10 pointer-events-none"
+                style={{ background: `linear-gradient(to right, ${BG}, transparent)` }}
+              />
+              <div
+                className="absolute right-0 inset-y-0 w-24 z-10 pointer-events-none"
+                style={{ background: `linear-gradient(to left, ${BG}, transparent)` }}
+              />
+              <motion.div
+                animate={{ x: ['0%', '-50%'] }}
+                transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+                className="flex"
+              >
+                {[...LOGOS_ROW_A, ...LOGOS_ROW_A].map((item, i) => (
+                  <LogoChip key={i} item={item} />
+                ))}
+              </motion.div>
+            </div>
+
+            {/* Row B — scrolling right */}
+            <div className="relative overflow-hidden">
+              <div
+                className="absolute left-0 inset-y-0 w-24 z-10 pointer-events-none"
+                style={{ background: `linear-gradient(to right, ${BG}, transparent)` }}
+              />
+              <div
+                className="absolute right-0 inset-y-0 w-24 z-10 pointer-events-none"
+                style={{ background: `linear-gradient(to left, ${BG}, transparent)` }}
+              />
+              <motion.div
+                animate={{ x: ['-50%', '0%'] }}
+                transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+                className="flex"
+              >
+                {[...LOGOS_ROW_B, ...LOGOS_ROW_B].map((item, i) => (
+                  <LogoChip key={i} item={item} />
+                ))}
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* ── Bottom Bar ───────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl p-6 md:p-8"
+            style={{
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.04)',
+              backdropFilter: 'blur(16px)',
+            }}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+              {/* Trust metrics */}
+              <div className="grid grid-cols-3 gap-4 divide-x divide-white/10">
+                {t.trustItems.map((item, i) => {
+                  const Icon = item.icon;
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.3 + i * 0.1 }}
+                      whileHover={{ scale: 1.06 }}
+                      className="text-center pl-4 first:pl-0"
+                    >
+                      <motion.div
+                        animate={{ rotate: [0, 8, -8, 0] }}
+                        transition={{ duration: 5, repeat: Infinity, delay: i * 0.5 }}
+                        className="inline-block mb-2"
+                      >
+                        <Icon className="w-5 h-5 mx-auto" style={{ color: '#fb923c' }} />
+                      </motion.div>
+                      <div className="font-black text-white" style={{ fontSize: 'clamp(1.1rem, 3vw, 1.6rem)' }}>
+                        {item.value}
+                      </div>
+                      <div style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.72rem' }}>
+                        {item.label}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Live activity feed */}
+              <div
+                className="rounded-xl px-4 py-3"
+                style={{ border: '1px solid rgba(16,185,129,0.3)', background: 'rgba(16,185,129,0.08)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <motion.div
+                      animate={{ opacity: [1, 0.3, 1] }}
+                      transition={{ duration: 1.2, repeat: Infinity }}
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: '#10b981' }}
+                    />
+                    <span className="font-bold uppercase tracking-widest" style={{ color: '#10b981', fontSize: '0.62rem' }}>
+                      LIVE
+                    </span>
+                  </div>
+                  <div className="relative flex-1 overflow-hidden" style={{ height: '1.2rem' }}>
+                    <AnimatePresence mode="wait">
+                      <motion.p
+                        key={activeLive}
+                        initial={{ y: 18, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: -18, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: 'easeOut' }}
+                        className="absolute whitespace-nowrap"
+                        style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.8rem' }}
+                      >
+                        {liveActivities[activeLive]}
+                      </motion.p>
+                    </AnimatePresence>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+    </section>
+  );
+}

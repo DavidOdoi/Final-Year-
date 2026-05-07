@@ -1,9 +1,7 @@
-import { useState } from 'react';
 import { motion } from 'motion/react';
 import {
   MapPin,
   Package,
-  DollarSign,
   ArrowRight,
   Clock,
   CheckCircle,
@@ -13,7 +11,6 @@ import {
 import { useNavigate } from 'react-router';
 import type { Load } from '../../lib/api';
 import {
-  formatCurrency,
   formatWeight,
   getLoadProgress,
   getLoadRoute,
@@ -26,19 +23,15 @@ interface ShipmentCardsProps {
   language: 'sw' | 'en';
   loads: Load[];
   isLoading?: boolean;
-  payingLoadId?: string | null;
-  onPayLoad?: (load: Load) => Promise<void>;
 }
 
 export function ShipmentCards({
   language,
   loads,
   isLoading = false,
-  payingLoadId = null,
-  onPayLoad,
 }: ShipmentCardsProps) {
   const navigate = useNavigate();
-  const [actionError, setActionError] = useState<string | null>(null);
+
   const content = {
     sw: {
       title: 'Usafirishaji wa Hivi Karibuni',
@@ -51,17 +44,9 @@ export function ShipmentCards({
       to: 'Kwenda',
       progress: 'Maendeleo',
       cargo: 'Mzigo',
-      budget: 'Bei',
       eta: 'Muda',
       driver: 'Dereva',
       trackingId: 'Tracking ID',
-      payment: 'Malipo',
-      payNow: 'Lipa Sasa',
-      paying: 'Inalipa...',
-      paymentPending: 'Inasubiri',
-      paymentPaid: 'Imelipwa',
-      paymentFailed: 'Imeshindikana',
-      paymentRefunded: 'Imerejeshwa',
       pending: 'Inasubiri',
       routeHint: 'Chagua mzigo ulio wazi ili uone madereva wanaolingana.',
     },
@@ -76,17 +61,9 @@ export function ShipmentCards({
       to: 'To',
       progress: 'Progress',
       cargo: 'Cargo',
-      budget: 'Price',
       eta: 'ETA',
       driver: 'Driver',
       trackingId: 'Tracking ID',
-      payment: 'Payment',
-      payNow: 'Pay Now',
-      paying: 'Paying...',
-      paymentPending: 'Pending',
-      paymentPaid: 'Paid',
-      paymentFailed: 'Failed',
-      paymentRefunded: 'Refunded',
       pending: 'Pending',
       routeHint: 'Choose an open load to see matching drivers.',
     },
@@ -97,56 +74,23 @@ export function ShipmentCards({
 
   const getStatusColor = (status: Load['status']) => {
     switch (status) {
-      case 'in_transit':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'assigned':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
-      case 'delivered':
-        return 'bg-green-100 text-green-700 border-green-200';
-      case 'cancelled':
-        return 'bg-red-100 text-red-700 border-red-200';
+      case 'in_transit':  return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'assigned':    return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'delivered':   return 'bg-green-100 text-green-700 border-green-200';
+      case 'cancelled':   return 'bg-red-100 text-red-700 border-red-200';
       case 'open':
-      default:
-        return 'bg-orange-100 text-orange-700 border-orange-200';
+      default:            return 'bg-orange-100 text-orange-700 border-orange-200';
     }
   };
 
   const getStatusIcon = (status: Load['status']) => {
     switch (status) {
-      case 'in_transit':
-        return Clock;
-      case 'assigned':
-        return Truck;
-      case 'delivered':
-        return CheckCircle;
-      default:
-        return AlertCircle;
+      case 'in_transit': return Clock;
+      case 'assigned':   return Truck;
+      case 'delivered':  return CheckCircle;
+      default:           return AlertCircle;
     }
   };
-
-  const getPaymentLabel = (status: Load['paymentStatus']) => {
-    switch (status) {
-      case 'paid':
-        return text.paymentPaid;
-      case 'failed':
-        return text.paymentFailed;
-      case 'refunded':
-        return text.paymentRefunded;
-      case 'pending':
-      default:
-        return text.paymentPending;
-    }
-  };
-
-  async function handlePayClick(shipment: Load) {
-    if (!onPayLoad) return;
-    setActionError(null);
-    try {
-      await onPayLoad(shipment);
-    } catch (error) {
-      setActionError(error instanceof Error ? error.message : 'Payment failed');
-    }
-  }
 
   return (
     <div className="relative">
@@ -175,16 +119,10 @@ export function ShipmentCards({
         <div className="rounded-2xl bg-white p-6 text-sm text-[#4B2E2B]/60 shadow-md">{text.empty}</div>
       ) : (
         <div className="space-y-4">
-          {actionError && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
-              {actionError}
-            </div>
-          )}
           {recentLoads.map((shipment, index) => {
             const StatusIcon = getStatusIcon(shipment.status);
             const route = getLoadRoute(shipment, language);
             const progress = getLoadProgress(shipment.status);
-            const amount = formatCurrency(shipment.price || shipment.budget || 0, language);
             const driverName = shipment.assignedDriver?.name || text.pending;
             const actionLabel = shipment.status === 'open' ? text.findTruck : text.viewDetails;
 
@@ -221,6 +159,7 @@ export function ShipmentCards({
                   </motion.button>
                 </div>
 
+                {/* Route */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="flex-1">
                     <div className="text-sm text-[#4B2E2B]/60 mb-1">{text.from}</div>
@@ -241,6 +180,7 @@ export function ShipmentCards({
                   </div>
                 </div>
 
+                {/* Progress */}
                 <div className="mb-4">
                   <div className="flex items-center justify-between text-xs text-[#4B2E2B]/60 mb-2">
                     <span>{text.progress}</span>
@@ -259,19 +199,13 @@ export function ShipmentCards({
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-[#4B2E2B]/10">
+                {/* Info grid — no price column */}
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-[#4B2E2B]/10">
                   <div>
                     <div className="text-xs text-[#4B2E2B]/60 mb-1">{text.cargo}</div>
                     <div className="flex items-center gap-1 text-[#4B2E2B] text-sm">
                       <Package className="w-3 h-3" />
                       <span className="truncate">{getLoadTitle(shipment, language)}</span>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-[#4B2E2B]/60 mb-1">{text.budget}</div>
-                    <div className="flex items-center gap-1 text-[#4B2E2B] text-sm">
-                      <DollarSign className="w-3 h-3" />
-                      <span>{amount}</span>
                     </div>
                   </div>
                   <div>
@@ -284,25 +218,10 @@ export function ShipmentCards({
                     <div className="text-xs text-[#4B2E2B]/40 mt-1">{formatWeight(shipment.weight, language)}</div>
                   </div>
                 </div>
+
                 <div className="mt-3 text-xs text-[#4B2E2B]/55">
                   {text.trackingId}: <span className="text-[#4B2E2B]">{shipment.trackingId || shipment._id}</span>
                 </div>
-                <div className="mt-2 text-xs text-[#4B2E2B]/55">
-                  {text.payment}:{' '}
-                  <span className="text-[#4B2E2B]">{getPaymentLabel(shipment.paymentStatus)}</span>
-                </div>
-
-                {shipment.status !== 'open' && shipment.paymentStatus !== 'paid' && onPayLoad && shipment._id && (
-                  <motion.button
-                    whileHover={{ scale: payingLoadId === shipment._id ? 1 : 1.02 }}
-                    whileTap={{ scale: payingLoadId === shipment._id ? 1 : 0.98 }}
-                    disabled={payingLoadId === shipment._id}
-                    onClick={() => void handlePayClick(shipment)}
-                    className="mt-3 w-full py-2 text-sm text-white bg-[#D4A373] hover:bg-[#b8865c] rounded-xl transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {payingLoadId === shipment._id ? text.paying : text.payNow}
-                  </motion.button>
-                )}
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}
